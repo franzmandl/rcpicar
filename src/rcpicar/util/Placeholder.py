@@ -2,8 +2,8 @@ from types import TracebackType
 from typing import Callable, Generic, Optional, Tuple, Type, TypeVar
 from .Atomic import Atomic
 from .FirstInLastOut import FirstInLastOut
-from ..service import AbstractServiceManager
-from ..promise.IPromise import IPromise
+from ..service import IServiceManager
+from ..promise.interfaces import IPromise
 from ..promise.PromiseService import PromiseService
 
 T = TypeVar('T')
@@ -31,7 +31,7 @@ class Placeholder(Generic[T]):
         with self._value as (optional, set_optional):
             return _get_and_clear(optional, set_optional)
 
-    def get_eventually(self, service_manager: AbstractServiceManager) -> IPromise[T]:
+    def get_eventually(self, service_manager: IServiceManager) -> IPromise[T]:
         promise: PromiseService[T] = PromiseService(service_manager)
         with self._value as (optional, _):
             if optional is None:

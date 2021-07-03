@@ -21,3 +21,12 @@ class IGpio(ABC):
     @abstractmethod
     def stop(self) -> None:
         """"""
+
+
+class IGpioService(ABC):
+    @abstractmethod
+    def update(self, speed: int, steering: int) -> None:
+        """"""
+
+    def reset(self) -> None:
+        self.update(0, 0)

@@ -12,11 +12,11 @@ from typing import Optional
 from .DiscoveryCommonArguments import DiscoveryCommonArguments
 from .DiscoveryRequestMessage import DiscoveryRequestMessage
 from .DiscoveryResponseMessage import DiscoveryResponseMessage
-from ..argument import IArguments
 from ..constants import buffer_size
 from ..log.util import log_method_call
-from ..service import AbstractService, AbstractServiceManager
+from ..service import IService, IServiceManager
 from ..socket_ import ISocket, ISocketFactory
+from ..util.argument import IArguments
 from ..util.Placeholder import Placeholder
 
 
@@ -25,15 +25,14 @@ class DiscoveryServerArguments(IArguments):
         self.common = DiscoveryCommonArguments()
 
 
-class DiscoveryServerService(AbstractService):
+class DiscoveryServerService(IService):
     def __init__(
             self,
             arguments: DiscoveryServerArguments,
             listen_port: int,
             socket_factory: ISocketFactory,
-            service_manager: AbstractServiceManager
+            service_manager: IServiceManager
     ) -> None:
-        super().__init__(service_manager)
         logger = getLogger(__name__)
         self.arguments = arguments
         self.listen_port = listen_port
@@ -41,6 +40,7 @@ class DiscoveryServerService(AbstractService):
         self.socket: Placeholder[ISocket] = Placeholder()
         self.socket_factory = socket_factory
         self.thread = Thread(target=log_method_call(logger, self.run))
+        service_manager.add_service(self)
 
     def get_service_name(self) -> str:
         return __name__

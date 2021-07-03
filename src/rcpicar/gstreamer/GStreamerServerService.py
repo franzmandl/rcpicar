@@ -1,18 +1,16 @@
 from __future__ import annotations
 from subprocess import PIPE, TimeoutExpired
 from typing import Optional, Tuple
-from .VideoRequestMessage import VideoRequestMessage
-from .VideoResponseMessage import VideoResponseMessage
+from .GStreamerRequestMessage import GStreamerRequestMessage
+from .GStreamerResponseMessage import GstreamerResponseMessage
 from .VideoSettings import VideoSettings
-from ..argument import IArguments
 from ..constants import caps_line_prefix
-from ..message import message_types
 from ..process import IProcess, ProcessFactory
 from ..reliable import IReliableDisconnectListener, IReliableService
-from ..receive import IReceiveListener
-from ..routed.RoutedReceiveService import RoutedReceiveService
-from ..routed.RoutedSendService import RoutedSendService
-from ..service import AbstractService, AbstractServiceManager
+from ..receive import IReceiveListener, IReceiveService
+from ..send import ISendService
+from ..service import IService, IServiceManager
+from ..util.argument import IArguments
 from ..util.ConnectionDetails import ConnectionDetails
 from ..util.Lazy import Lazy
 from ..util.Placeholder import Placeholder
@@ -39,7 +37,7 @@ class GStreamerServerArguments(IArguments):
 
 
 class GStreamerServerService(
-    AbstractService,
+    IService,
     IReceiveListener,
     IReliableDisconnectListener
 ):
@@ -47,19 +45,19 @@ class GStreamerServerService(
             self,
             arguments: GStreamerServerArguments,
             process_factory: ProcessFactory,
-            routed_receive_service: RoutedReceiveService,
+            receive_service: IReceiveService,
             reliable_service: IReliableService,
-            routed_send_service: RoutedSendService,
-            service_manager: AbstractServiceManager,
+            send_service: ISendService,
+            service_manager: IServiceManager,
     ) -> None:
-        super().__init__(service_manager)
         self.arguments = arguments
         self.caps: Placeholder[str] = Placeholder()
         self.gstreamer_pipeline: Placeholder[GStreamerPipeline] = Placeholder()
         self.process_factory = process_factory
-        self.send_service = routed_send_service.create_send_service(message_types.video)
-        routed_receive_service.create_receive_service(message_types.video).add_receive_listener(self)
+        self.send_service = send_service
+        receive_service.add_receive_listener(self)
         reliable_service.add_reliable_disconnect_listener(self)
+        service_manager.add_service(self)
 
     def get_service_name(self) -> str:
         return __name__
@@ -107,9 +105,9 @@ class GStreamerServerService(
             return set_gstreamer_pipeline(GStreamerPipeline(address, caps, raspivid_process, settings)).caps
 
     def on_receive(self, message: bytes, details: ConnectionDetails) -> None:
-        request = VideoRequestMessage.decode(message)
+        request = GStreamerRequestMessage.decode(message)
         self.send_service.send(
-            VideoResponseMessage(self.open_video(
+            GstreamerResponseMessage(self.open_video(
                 request.address,
                 request.settings,
             ), request.address[1]).encode())

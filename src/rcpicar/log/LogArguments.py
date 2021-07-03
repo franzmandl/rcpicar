@@ -1,5 +1,6 @@
 from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING
-from ..argument import AnyArguments, ChoiceArgument, IArguments, ValueArgument
+from .util import configure_log
+from ..util.argument import AnyArguments, create_choice_argument, create_value_argument, IArguments
 from ..util.Lazy import Lazy
 
 
@@ -8,11 +9,14 @@ class LogArguments(IArguments):
         self.log_file = Lazy(lambda store: None)
         self.log_level = Lazy(lambda store: WARNING)
 
+    def configure_log(self) -> None:
+        configure_log(self.log_file.get(), self.log_level.get())
+
     def get_arguments(self) -> AnyArguments:
         return [
-            ValueArgument(
+            create_value_argument(
                 self.log_file, '--log-file', str, 'Gets created if does not exists. Gets appended if exists.'),
-            ChoiceArgument(self.log_level, '--log-level', {
+            create_choice_argument(self.log_level, '--log-level', {
                 'debug': DEBUG,
                 'info': INFO,
                 'warn': WARNING,

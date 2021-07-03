@@ -2,17 +2,15 @@ from __future__ import annotations
 from queue import Empty
 from threading import Thread
 from typing import Optional
-from .ILatencyListener import ILatencyListener
-from .ILatencyServerService import ILatencyServerService
+from .interfaces import ILatencyListener
+from .interfaces import ILatencyServerService
 from .LatencyMessage import LatencyMessage
-from ..argument import IArguments
 from ..clock import IClock
-from ..message import message_types
 from ..queue_ import IQueue
-from ..receive import IReceiveListener
-from ..routed.RoutedReceiveService import RoutedReceiveService
-from ..routed.RoutedSendService import RoutedSendService
-from ..service import AbstractService, AbstractServiceManager
+from ..receive import IReceiveListener, IReceiveService
+from ..send import ISendService
+from ..service import IService, IServiceManager
+from ..util.argument import IArguments
 from ..util.ConnectionDetails import ConnectionDetails
 from ..util.InterruptableSleep import InterruptableSleep
 from ..util.Lazy import Lazy
@@ -25,24 +23,24 @@ class LatencyServerArguments(IArguments):
         self.latency_check_interval_seconds = Lazy(lambda store: 1.0)
 
 
-class LatencyServerService(ILatencyServerService, IReceiveListener, AbstractService):
+class LatencyServerService(ILatencyServerService, IReceiveListener, IService):
     def __init__(
             self,
             arguments: LatencyServerArguments,
             clock: IClock,
-            routed_receive_service: RoutedReceiveService,
-            routed_send_service: RoutedSendService,
-            service_manager: AbstractServiceManager,
+            receive_service: IReceiveService,
+            send_service: ISendService,
+            service_manager: IServiceManager,
     ) -> None:
-        super().__init__(service_manager)
         self.arguments = arguments
         self.clock = clock
         self.interruptable_sleep = InterruptableSleep(clock)
         self.listeners: Listeners[ILatencyListener] = Listeners()
         self.received_messages: IQueue[Optional[LatencyMessage]] = IdealQueue()
-        self.send_service = routed_send_service.create_send_service(message_types.latency)
+        self.send_service = send_service
         self.thread = Thread(target=self.run)
-        routed_receive_service.create_receive_service(message_types.latency).add_receive_listener(self)
+        receive_service.add_receive_listener(self)
+        service_manager.add_service(self)
 
     def get_service_name(self) -> str:
         return __name__

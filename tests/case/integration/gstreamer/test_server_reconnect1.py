@@ -1,11 +1,12 @@
 from subprocess import PIPE
 from rcpicar.constants import caps_line_prefix
 from rcpicar.gstreamer.GStreamerServerService import GStreamerServerArguments, GStreamerServerService
+from rcpicar.message import message_types
 from rcpicar.routed.RoutedReceiveService import RoutedReceiveService
 from rcpicar.routed.RoutedSendService import RoutedSendService
 from rcpicar.util.MultiServiceManager import MultiServiceManager
 from rcpicar.util.RTC import rtc
-from tests.mock.helper import create_video_request_message, create_video_response_message, mock_client_address
+from tests.mock.helper import create_gstreamer_request_message, create_gstreamer_response_message, mock_client_address
 from tests.mock.helper import mock_video_settings
 from tests.mock.process import MockIO, MockProcess, MockProcessFactory
 from tests.mock.receive import MockReceiveService
@@ -48,19 +49,21 @@ def test() -> None:
             '-fps', str(mock_video_settings.fps), '-b', str(mock_video_settings.bit_rate), '-o', '-'), None, PIPE):
                 mock_raspivid_process,
     })
-    service_manager = MultiServiceManager(rtc)
+    service_manager = MultiServiceManager()
     GStreamerServerService(
-        GStreamerServerArguments(), mock_process_factory, RoutedReceiveService(mock_receive.mock), mock_reliable,
-        RoutedSendService(mock_send), service_manager)
+        GStreamerServerArguments(), mock_process_factory,
+        RoutedReceiveService(mock_receive.mock).create_receive_service(message_types.gstreamer), mock_reliable,
+        RoutedSendService(mock_send).create_send_service(message_types.gstreamer), service_manager)
     # when
-    with service_manager:
-        mock_receive.send(create_video_request_message(mock_client_address, mock_video_settings).routed().encode())
-        mock_receive.send(create_video_request_message(another_client_address, mock_video_settings).routed().encode())
+    with rtc.use_services(service_manager):
+        mock_receive.send(create_gstreamer_request_message(mock_client_address, mock_video_settings).routed().encode())
+        mock_receive.send(create_gstreamer_request_message(
+            another_client_address, mock_video_settings).routed().encode())
     # then
     assert mock_process_factory.call___spy.get_times_called() == 4
     assert mock_send.send_spy.get_called_args() == [
-        (create_video_response_message(mock_caps, mock_client_address[1]).routed().encode(),),
-        (create_video_response_message(mock_caps, another_client_address[1]).routed().encode(),),
+        (create_gstreamer_response_message(mock_caps, mock_client_address[1]).routed().encode(),),
+        (create_gstreamer_response_message(mock_caps, another_client_address[1]).routed().encode(),),
     ]
     assert mock_raspivid_process.terminate_spy.get_called_args() == [(), ()]
 

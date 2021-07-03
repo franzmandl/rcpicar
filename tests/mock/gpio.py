@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Tuple
-from rcpicar.gpio.IGpio import IGpio
-from rcpicar.gpio.IGpioServerService import IGpioServerService
+from rcpicar.gpio.interfaces import IGpio, IGpioService
 from tests.suite.spy import FunctionSpy
 
 
@@ -39,10 +38,10 @@ class MockGpio(IGpio):
         self.stop_spy(())
 
 
-class MockGpioServerService(IGpioServerService):
+class MockGpioService(IGpioService):
     @staticmethod
-    def create_dummy() -> MockGpioServerService:
-        mock = MockGpioServerService()
+    def create_dummy() -> MockGpioService:
+        mock = MockGpioService()
         mock.update_spy.constant(None)
         mock.reset_spy.constant(None)
         return mock
@@ -51,8 +50,8 @@ class MockGpioServerService(IGpioServerService):
         self.update_spy: FunctionSpy[Tuple[int, int], None] = FunctionSpy()
         self.reset_spy: FunctionSpy[Tuple[()], None] = FunctionSpy()
 
-    def update(self, motor_value: int, steering_value: int) -> None:
-        self.update_spy((motor_value, steering_value))
+    def update(self, speed: int, steering: int) -> None:
+        self.update_spy((speed, steering))
 
     def reset(self) -> None:
         self.reset_spy(())

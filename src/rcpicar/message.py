@@ -7,9 +7,9 @@ class _MessageTypes:
         message_type_generator = iter(range(2**8))
         self.car = next(message_type_generator)
         self.custom = next(message_type_generator)
+        self.gstreamer = next(message_type_generator)
         self.latency = next(message_type_generator)
         self.stop = next(message_type_generator)
-        self.video = next(message_type_generator)
 
 
 message_types = _MessageTypes()

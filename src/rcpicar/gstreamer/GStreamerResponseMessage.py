@@ -9,7 +9,7 @@ format_length = get_required_size(format_string)
 format_type = Tuple[int]
 
 
-class VideoResponseMessage(IMessage):
+class GstreamerResponseMessage(IMessage):
     def __init__(self, caps: str, port: int) -> None:
         self.caps = caps
         self.port = port
@@ -18,7 +18,7 @@ class VideoResponseMessage(IMessage):
         return pack(format_string, self.port) + self.caps.encode()
 
     @staticmethod
-    def decode(message: bytes) -> VideoResponseMessage:
+    def decode(message: bytes) -> GstreamerResponseMessage:
         port, = cast(format_type, unpack(format_string, message[:format_length]))
         caps = message[format_length:].decode()
-        return VideoResponseMessage(caps, port)
+        return GstreamerResponseMessage(caps, port)

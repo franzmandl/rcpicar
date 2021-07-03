@@ -9,7 +9,7 @@ from ..log.util import log_method_call
 from ..receive import IReceiveListener
 from ..reliable import IReliableReceiveListener, IReliableReceiveSendService, IReliableConnectListener
 from ..reliable import IReliableDisconnectListener, IReliableOsErrorListener
-from ..service import AbstractService, AbstractServiceManager
+from ..service import IService, IServiceManager
 from ..socket_ import ISocket, ISocketFactory
 from ..util import checking
 from ..util.ConnectionDetails import ConnectionDetails
@@ -18,16 +18,15 @@ from ..util.Listeners import Listeners
 from ..util.Placeholder import Placeholder
 
 
-class TcpClientService(AbstractService, IReliableReceiveSendService):
+class TcpClientService(IService, IReliableReceiveSendService):
     def __init__(
             self,
             clock: IClock,
             reconnect_seconds: float,
             server_address: Placeholder[Tuple[str, int]],
-            service_manager: AbstractServiceManager,
+            service_manager: IServiceManager,
             socket_factory: ISocketFactory,
     ) -> None:
-        super().__init__(service_manager)
         self.connected_listeners: Listeners[IReliableConnectListener] = Listeners()
         self.disconnected_listeners: Listeners[IReliableDisconnectListener] = Listeners()
         self.interruptable_sleep = InterruptableSleep(clock)
@@ -42,6 +41,7 @@ class TcpClientService(AbstractService, IReliableReceiveSendService):
         self.socket: Placeholder[ISocket] = Placeholder()
         self.socket_factory = socket_factory
         self.thread = Thread(target=log_method_call(self.logger, self.run))
+        service_manager.add_service(self)
 
     def add_reliable_connect_listener(self, listener: IReliableConnectListener) -> TcpClientService:
         self.connected_listeners.add_listener(listener)

@@ -1,9 +1,8 @@
-from ..argument import IArguments
-from ..gpio.IGpioServerService import IGpioServerService
-from ..latency.ILatencyListener import ILatencyListener
-from ..latency.ILatencyServerService import ILatencyServerService
-from ..timeout.ITimeoutReceiveListener import ITimeoutReceiveListener
-from ..timeout.TimeoutReceiveService import TimeoutReceiveService
+from ..gpio.interfaces import IGpioService
+from ..latency.interfaces import ILatencyListener
+from ..latency.interfaces import ILatencyServerService
+from ..timeout.interfaces import ITimeoutReceiveListener, ITimeoutReceiveService
+from ..util.argument import IArguments
 from ..util.Atomic import Atomic
 from ..util.Lazy import Lazy
 from ..util.util import min_max
@@ -26,21 +25,22 @@ class ThrottleServerArguments(IArguments):
 
 
 class ThrottleServerService(
+    IGpioService,
     ILatencyListener,
     ITimeoutReceiveListener,
 ):
     def __init__(
             self,
             arguments: ThrottleServerArguments,
-            gpio_service: IGpioServerService,
+            gpio_service: IGpioService,
             latency_service: ILatencyServerService,
-            timeout_service: TimeoutReceiveService,
+            timeout_service: ITimeoutReceiveService,
     ) -> None:
         self.arguments = arguments
         self.current_throttle = Atomic(arguments.worst_throttle.get())
         self.gpio_service = gpio_service
-        latency_service.add_latency_listener(self)
         self.timeout_service = timeout_service.add_timeout_listener(self)
+        latency_service.add_latency_listener(self)
 
     def on_latency_available(self, latency: float) -> None:
         new_throttle = self.arguments.worst_throttle.get()
@@ -61,9 +61,12 @@ class ThrottleServerService(
             set_current_throttle(self.arguments.worst_throttle.get())
 
     def on_timeout_receive(self) -> None:
+        self.gpio_service.reset()
         with self.current_throttle as (_, set_current_throttle):
             set_current_throttle(self.arguments.worst_throttle.get())
-        self.gpio_service.reset()
 
-    def update(self, motor_value: int, steering_value: int) -> None:
-        self.gpio_service.update(self.current_throttle.get().get_throttled_speed(motor_value), steering_value)
+    def update(self, speed: int, steering: int) -> None:
+        self.gpio_service.update(self.current_throttle.get().get_throttled_speed(speed), steering)
+
+    def reset(self) -> None:
+        self.gpio_service.reset()

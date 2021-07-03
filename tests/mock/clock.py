@@ -1,9 +1,11 @@
 from queue import Empty
 from threading import Condition, Event, Lock, Thread
 from time import sleep
-from typing import Any, Callable, Optional, Set, TypeVar
+from types import TracebackType
+from typing import Any, Callable, ContextManager, Optional, Set, Type, TypeVar
 from rcpicar.clock import IClock
 from rcpicar.queue_ import IQueue
+from rcpicar.service import IServiceManager
 
 T = TypeVar('T')
 
@@ -77,6 +79,9 @@ class MockClock(IClock):
             self.ticks += count
             self.cv.notify_all()
 
+    def use_services(self, service_manager: IServiceManager) -> ContextManager[None]:
+        return MockContext(self, service_manager)
+
     def wait_for_event(self, event: Event, timeout_seconds: Optional[float] = None) -> bool:
         if timeout_seconds is None:
             return event.wait()
@@ -88,3 +93,22 @@ class MockClock(IClock):
                         return True
                     self.cv.wait()
             return False
+
+
+class MockContext:
+    def __init__(self, clock: MockClock, service_manager: IServiceManager) -> None:
+        self.clock = clock
+        self.service_manager = service_manager
+
+    def __enter__(self) -> None:
+        self.service_manager.start_all()
+
+    def __exit__(
+            self,
+            exc_type: Optional[Type[BaseException]],
+            exc_val: Optional[BaseException],
+            exc_tb: Optional[TracebackType]
+    ) -> None:
+        self.service_manager.stop_all()
+        self.clock.notify()
+        self.service_manager.join_all()

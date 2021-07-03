@@ -25,7 +25,7 @@ class Context:
         self.mock_server_socket = MockSocket.create_tcp_server(
             self.mock_server_socket_tunnel, mock_server_address, mock_server_address)
         self.mock_server_socket_factory = MockSocketFactory.create_dummy(self.mock_server_socket)
-        self.service_manager = MultiServiceManager(rtc)
+        self.service_manager = MultiServiceManager()
         self.mock_client_receive_listener = MockReceiveListener.create_dummy()
         self.mock_client_reliable_connect_listener = MockReliableConnectListener.create_dummy()
         self.mock_client_reliable_disconnect_listener = MockReliableDisconnectListener.create_dummy()
@@ -53,7 +53,7 @@ def test() -> None:
     # given
     ctx = Context()
     # when
-    with ctx.service_manager:
+    with rtc.use_services(ctx.service_manager):
         ctx.mock_client_socket.recv_spy.wait_for_call()
         ctx.mock_server_socket_tunnel.recv_spy.wait_for_call()
         ctx.client_service.send(messages[0])

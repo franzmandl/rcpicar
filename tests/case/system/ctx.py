@@ -1,9 +1,11 @@
 from socket import AF_INET, IPPROTO_UDP, SOCK_DGRAM, SOCK_STREAM
-from typing import Optional, Tuple
+from typing import cast, Optional, Tuple
 from rcpicar.client.Client import Client
 from rcpicar.clock import IClock
+from rcpicar.latency.LatencyServerService import LatencyServerService
 from rcpicar.queue_ import IQueue
 from rcpicar.server.Server import Server
+from rcpicar.throttle.ThrottleServerService import ThrottleServerService
 from rcpicar.util.IdealQueue import IdealQueue
 from tests.mock.gpio import MockGpio
 from tests.mock.helper import mock_client_address, mock_server_address
@@ -55,3 +57,11 @@ class ServerContext:
         self.server.socket_factory.set(self.mock_socket_factory)
         self.gpio = MockGpio.create_dummy()
         self.server.gpio_factory.set(lambda: self.gpio)
+
+    @property
+    def latency_service(self) -> LatencyServerService:
+        return self.server.latency_service_implementation.get()
+
+    @property
+    def throttle_service(self) -> ThrottleServerService:
+        return self.server.throttle_service_implementation.get()

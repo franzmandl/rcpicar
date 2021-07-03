@@ -1,12 +1,12 @@
 from __future__ import annotations
 from logging import getLogger
-from ..latency.ILatencyListener import ILatencyListener
+from ..latency.interfaces import ILatencyListener
 from ..receive import IReceiveListener
 from ..reliable import IReliableConnectListener, IReliableDisconnectListener, IReliableOsErrorListener
 from ..reliable import IReliableReceiveListener
-from ..routed.IRoutedReceiveListener import IRoutedReceiveListener
+from ..routed.interfaces import IRoutedReceiveListener
 from ..unreliable import IUnreliableOsErrorListener, IUnreliableReceiveListener
-from ..timeout.ITimeoutReceiveListener import ITimeoutReceiveListener
+from ..timeout.interfaces import ITimeoutReceiveListener
 from ..util.ConnectionDetails import ConnectionDetails
 
 

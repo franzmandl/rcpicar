@@ -9,7 +9,7 @@ from ..log.util import log_method_call
 from ..receive import IReceiveListener
 from ..reliable import IReliableReceiveSendService, IReliableOsErrorListener, IReliableReceiveListener
 from ..reliable import IReliableConnectListener, IReliableDisconnectListener
-from ..service import AbstractService, AbstractServiceManager
+from ..service import IService, IServiceManager
 from ..socket_ import ISocket, ISocketFactory
 from ..util import checking
 from ..util.ConnectionDetails import ConnectionDetails
@@ -37,14 +37,13 @@ class AcceptWrapper:
         self.socket.__exit__(exc_type, exc_val, exc_tb)
 
 
-class TcpServerService(AbstractService, IReliableReceiveSendService):
+class TcpServerService(IService, IReliableReceiveSendService):
     def __init__(
             self,
             listen_address: Tuple[str, int],
-            service_manager: AbstractServiceManager,
+            service_manager: IServiceManager,
             socket_factory: ISocketFactory,
     ) -> None:
-        super().__init__(service_manager)
         self.connected_listeners: Listeners[IReliableConnectListener] = Listeners()
         self.disconnected_listeners: Listeners[IReliableDisconnectListener] = Listeners()
         self.listen_address = listen_address
@@ -57,6 +56,7 @@ class TcpServerService(AbstractService, IReliableReceiveSendService):
         self.server_socket: Placeholder[ISocket] = Placeholder()
         self.socket: Placeholder[ISocket] = Placeholder()
         self.thread = Thread(target=log_method_call(self.logger, self.run))
+        service_manager.add_service(self)
 
     def add_reliable_connect_listener(self, listener: IReliableConnectListener) -> TcpServerService:
         self.connected_listeners.add_listener(listener)

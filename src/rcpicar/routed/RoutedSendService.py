@@ -1,4 +1,5 @@
 from __future__ import annotations
+from .interfaces import IRoutedSendService
 from .RoutedMessage import RoutedMessage
 from ..send import ISendService
 
@@ -12,7 +13,7 @@ class SendService(ISendService):
         self.routed_send_service.send(self.message_type, message)
 
 
-class RoutedSendService:
+class RoutedSendService(IRoutedSendService):
     def __init__(self, send_service: ISendService) -> None:
         self.send_service = send_service
 

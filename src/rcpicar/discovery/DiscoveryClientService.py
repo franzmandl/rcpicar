@@ -12,11 +12,12 @@ from typing import Optional, Tuple
 from .DiscoveryCommonArguments import DiscoveryCommonArguments
 from .DiscoveryRequestMessage import DiscoveryRequestMessage
 from .DiscoveryResponseMessage import DiscoveryResponseMessage
-from ..argument import AnyArguments, IArguments, ValueArgument
+from .interfaces import IDiscoveryClientService
 from ..constants import buffer_size
 from ..log.util import log_method_call
-from ..service import AbstractService, AbstractServiceManager
+from ..service import IService, IServiceManager
 from ..socket_ import ISocket, ISocketFactory
+from ..util.argument import AnyArguments, create_value_argument, IArguments
 from ..util.Lazy import Lazy
 from ..util.Placeholder import Placeholder
 
@@ -30,21 +31,20 @@ class DiscoveryClientArguments(IArguments):
 
     def get_arguments(self) -> AnyArguments:
         return [
-            ValueArgument(
+            create_value_argument(
                 self.timeout_seconds, '--discovery-timeout-seconds', int,
                 'Retry discovery after this amount of seconds.'),
-            ValueArgument(self.ip, '--discovery-ip', str, 'Where to send discovery broadcast.'),
+            create_value_argument(self.ip, '--discovery-ip', str, 'Where to send discovery broadcast.'),
         ]
 
 
-class DiscoveryClientService(AbstractService):
+class DiscoveryClientService(IDiscoveryClientService, IService):
     def __init__(
             self,
             arguments: DiscoveryClientArguments,
-            service_manager: AbstractServiceManager,
+            service_manager: IServiceManager,
             socket_factory: ISocketFactory,
     ) -> None:
-        super().__init__(service_manager)
         self.arguments = arguments
         self.logger = getLogger(__name__)
         self.server_address: Placeholder[Tuple[str, int]] = Placeholder()
@@ -52,6 +52,10 @@ class DiscoveryClientService(AbstractService):
         self.socket: Placeholder[ISocket] = Placeholder()
         self.socket_factory = socket_factory
         self.thread = Thread(target=log_method_call(self.logger, self.run))
+        service_manager.add_service(self)
+
+    def get_server_address(self) -> Placeholder[Tuple[str, int]]:
+        return self.server_address
 
     def get_service_name(self) -> str:
         return __name__

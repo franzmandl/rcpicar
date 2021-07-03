@@ -2,12 +2,11 @@ from __future__ import annotations
 from queue import Empty
 from threading import Thread
 from typing import Optional, Union
-from .ITimeoutReceiveListener import ITimeoutReceiveListener
-from .ITimeoutReceiveService import ITimeoutReceiveService
+from .interfaces import ITimeoutReceiveListener, ITimeoutReceiveService
 from ..clock import IClock
 from ..queue_ import IQueue
 from ..receive import IReceiveListener, IReceiveService
-from ..service import AbstractService, AbstractServiceManager
+from ..service import IService, IServiceManager
 from ..util.ConnectionDetails import ConnectionDetails
 from ..util.IdealQueue import IdealQueue
 from ..util.Listeners import Listeners
@@ -26,15 +25,14 @@ class StopEvent:
     pass
 
 
-class TimeoutReceiveService(AbstractService, IReceiveListener, IReceiveService, ITimeoutReceiveService):
+class TimeoutReceiveService(IService, IReceiveListener, ITimeoutReceiveService):
     def __init__(
             self,
             clock: IClock,
             receive_service: IReceiveService,
-            service_manager: AbstractServiceManager,
+            service_manager: IServiceManager,
             timeout_seconds: Optional[float] = None,
     ) -> None:
-        super().__init__(service_manager)
         self.clock = clock
         self.event_bus: IQueue[Union[ReceiveEvent, SetTimeoutEvent, StopEvent]] = IdealQueue()
         self.receive_listeners: Listeners[IReceiveListener] = Listeners()
@@ -42,6 +40,7 @@ class TimeoutReceiveService(AbstractService, IReceiveListener, IReceiveService, 
         self.timeout_listeners: Listeners[ITimeoutReceiveListener] = Listeners()
         self.timeout_seconds = timeout_seconds
         receive_service.add_receive_listener(self)
+        service_manager.add_service(self)
 
     def add_receive_listener(self, listener: IReceiveListener) -> TimeoutReceiveService:
         self.receive_listeners.add_listener(listener)

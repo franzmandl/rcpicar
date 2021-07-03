@@ -1,13 +1,13 @@
 from __future__ import annotations
 from .ExpireMessage import ExpireMessage, highest_message_number, message_number_range, valid_message_number_range
-from .IExpireReceiveListener import IExpireReceiveListener
+from .interfaces import IExpireReceiveListener, IExpireReceiveService
 from ..receive import IReceiveListener, IReceiveService
 from ..util.Atomic import Atomic
 from ..util.ConnectionDetails import ConnectionDetails
 from ..util.Listeners import Listeners
 
 
-class ExpireReceiveService(IReceiveListener, IReceiveService):
+class ExpireReceiveService(IExpireReceiveService, IReceiveListener, IReceiveService):
     def __init__(self, receive_service: IReceiveService) -> None:
         self.last_message_number = Atomic(0)
         self.expire_listeners: Listeners[IExpireReceiveListener] = Listeners()
@@ -38,3 +38,7 @@ class ExpireReceiveService(IReceiveListener, IReceiveService):
     def add_expire_listener(self, listener: IExpireReceiveListener) -> ExpireReceiveService:
         self.expire_listeners.add_listener(listener)
         return self
+
+    def reset(self) -> None:
+        with self.last_message_number as (_, set_last_message_number):
+            set_last_message_number(0)

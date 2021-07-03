@@ -2,7 +2,7 @@ buffer_size = 1024
 caps_line_prefix = '/GstPipeline:pipeline0/GstUDPSink:udpsink0.GstPad:sink: caps = '
 default_discovery_port = 5002
 default_server_port = 5003
-default_video_port = 5004
+default_gstreamer_port = 5004
 discover_server_ip = 'discover'
 discovery_magic_request_bytes = bytes([
     0x62, 0x65, 0x76, 0x6f, 0x72, 0x20, 0x64, 0x61, 0x73, 0x73, 0x20, 0x69, 0x20, 0x7a, 0x75, 0x72, 0x20, 0x73, 0x74,

@@ -1,17 +1,17 @@
 from __future__ import annotations
 from threading import Event
 from typing import Generic, Optional, TypeVar
-from .IPromise import IPromise
-from ..service import AbstractStartedService, AbstractServiceManager
+from .interfaces import IPromise
+from ..service import IStartedService, IServiceManager
 
 T = TypeVar('T')
 
 
-class PromiseService(Generic[T], IPromise[T], AbstractStartedService):
-    def __init__(self, service_manager: AbstractServiceManager) -> None:
-        super().__init__(service_manager)
+class PromiseService(Generic[T], IPromise[T], IStartedService):
+    def __init__(self, service_manager: IServiceManager) -> None:
         self._event = Event()
         self._value: Optional[T] = None
+        service_manager.add_started_service(self)
 
     def get_blocking(self) -> Optional[T]:
         self._event.wait()

@@ -8,7 +8,7 @@ from ..clock import IClock
 from ..constants import buffer_size
 from ..log.util import log_method_call
 from ..receive import IReceiveListener
-from ..service import AbstractService, AbstractServiceManager
+from ..service import IService, IServiceManager
 from ..socket_ import ISocket, ISocketFactory
 from ..unreliable import IUnreliableOsErrorListener, IUnreliableReceiveListener, IUnreliableReceiveSendService
 from ..util import checking
@@ -17,17 +17,16 @@ from ..util.Listeners import Listeners
 from ..util.Placeholder import Placeholder
 
 
-class UdpService(AbstractService, IUnreliableReceiveSendService):
+class UdpService(IService, IUnreliableReceiveSendService):
     def __init__(
             self,
             clock: IClock,
             is_server: bool,
             server_address: Placeholder[Tuple[str, int]],
-            service_manager: AbstractServiceManager,
+            service_manager: IServiceManager,
             socket_factory: ISocketFactory,
             unreliable_timeout_seconds: float = inf,
     ) -> None:
-        super().__init__(service_manager)
         logger = getLogger(__name__)
         self.clock = clock
         self.is_server = is_server
@@ -43,6 +42,7 @@ class UdpService(AbstractService, IUnreliableReceiveSendService):
         self.thread = Thread(target=log_method_call(logger, self.run))
         self.unreliable_received_listeners: Listeners[IUnreliableReceiveListener] = Listeners()
         self.unreliable_timeout_seconds = unreliable_timeout_seconds
+        service_manager.add_service(self)
 
     def add_unreliable_os_error_listener(self, listener: IUnreliableOsErrorListener) -> UdpService:
         self.os_error_listeners.add_listener(listener)
@@ -99,7 +99,9 @@ class UdpService(AbstractService, IUnreliableReceiveSendService):
             return
         if self.last_received_seconds + self.unreliable_timeout_seconds < self.clock.get_seconds():
             return
-        self.socket.get().sendto(message, receiver_address)
+        socket = self.socket.get_optional()
+        if socket is not None:
+            socket.sendto(message, receiver_address)
 
     def start_service(self) -> None:
         self.thread.start()

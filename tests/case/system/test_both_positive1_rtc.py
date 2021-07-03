@@ -17,8 +17,8 @@ def test() -> None:
     client_ctx.client.latency_service.get()
     server_ctx.server.latency_service.get()
     # when
-    with server_ctx.server.service_manager.get():
-        with client_ctx.client.service_manager.get():
+    with server_ctx.server.use_services():
+        with client_ctx.client.use_services():
             sleep(2)
     # then
     assert server_ctx.gpio.set_pwm_frequency_spy.get_called_args() == [(12, 50), (13, 50)]

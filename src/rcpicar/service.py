@@ -1,14 +1,9 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from types import TracebackType
-from typing import Optional, Type
-from .clock import IClock
+from typing import Optional
 
 
-class AbstractService(ABC):
-    def __init__(self, service_manager: AbstractServiceManager) -> None:
-        service_manager.add_service(self)
-
+class IService(ABC):
     @abstractmethod
     def get_service_name(self) -> str:
         """"""
@@ -28,10 +23,7 @@ class AbstractService(ABC):
         """"""
 
 
-class AbstractStartedService(ABC):
-    def __init__(self, service_manager: AbstractServiceManager) -> None:
-        service_manager.add_started_service(self)
-
+class IStartedService(ABC):
     @abstractmethod
     def get_service_name(self) -> str:
         """"""
@@ -45,10 +37,10 @@ class AbstractStartedService(ABC):
         """"""
 
 
-class StartedServiceWrapper(AbstractStartedService):
-    def __init__(self, service: AbstractService, service_manager: AbstractServiceManager) -> None:
-        super().__init__(service_manager)
+class StartedServiceWrapper(IStartedService):
+    def __init__(self, service: IService, service_manager: IServiceManager) -> None:
         self.service = service
+        service_manager.add_started_service(self)
 
     def get_service_name(self) -> str:
         return self.service.get_service_name()
@@ -60,16 +52,13 @@ class StartedServiceWrapper(AbstractStartedService):
         self.service.stop_service()
 
 
-class AbstractServiceManager(ABC):
-    def __init__(self, clock: IClock) -> None:
-        self.clock = clock
-
+class IServiceManager(ABC):
     @abstractmethod
-    def add_service(self, service: AbstractService) -> None:
+    def add_service(self, service: IService) -> None:
         """"""
 
     @abstractmethod
-    def add_started_service(self, service: AbstractStartedService) -> None:
+    def add_started_service(self, service: IStartedService) -> None:
         """"""
 
     @abstractmethod
@@ -83,16 +72,3 @@ class AbstractServiceManager(ABC):
     @abstractmethod
     def stop_all(self) -> None:
         """"""
-
-    def __enter__(self) -> None:
-        self.start_all()
-
-    def __exit__(
-            self,
-            exc_type: Optional[Type[BaseException]],
-            exc_val: Optional[BaseException],
-            exc_tb: Optional[TracebackType]
-    ) -> None:
-        self.stop_all()
-        self.clock.notify()
-        self.join_all()

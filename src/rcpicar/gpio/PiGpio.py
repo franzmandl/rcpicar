@@ -1,5 +1,5 @@
 from pigpio import pi
-from .IGpio import IGpio
+from .interfaces import IGpio
 
 
 class PiGpio(IGpio):

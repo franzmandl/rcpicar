@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Dict
-from .IRoutedReceiveListener import IRoutedReceiveListener
+from .interfaces import IRoutedReceiveListener, IRoutedReceiveService
 from .RoutedMessage import RoutedMessage
 from ..receive import IReceiveListener, IReceiveService
 from ..util.ConnectionDetails import ConnectionDetails
@@ -25,7 +25,7 @@ class ReceiveService(IReceiveService):
         return self
 
 
-class RoutedReceiveService(IReceiveListener):
+class RoutedReceiveService(IReceiveListener, IRoutedReceiveService):
     def __init__(self, receive_service: IReceiveService) -> None:
         self.received_listeners: Dict[int, Listeners[IRoutedReceiveListener]] = dict()
         receive_service.add_receive_listener(self)

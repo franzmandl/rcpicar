@@ -1,22 +1,20 @@
 from __future__ import annotations
 from logging import getLogger
 from .Placeholder import Placeholder
-from ..clock import IClock
-from ..service import AbstractService, AbstractStartedService, AbstractServiceManager, StartedServiceWrapper
+from ..service import IService, IStartedService, IServiceManager, StartedServiceWrapper
 
 
-class SingleServiceManager(AbstractServiceManager):
-    def __init__(self, clock: IClock) -> None:
-        super().__init__(clock)
+class SingleServiceManager(IServiceManager):
+    def __init__(self) -> None:
         self.logger = getLogger(__name__)
-        self._not_started_service: Placeholder[AbstractService] = Placeholder()
-        self._running_service: Placeholder[AbstractStartedService] = Placeholder()
-        self._stopped_service: Placeholder[AbstractStartedService] = Placeholder()
+        self._not_started_service: Placeholder[IService] = Placeholder()
+        self._running_service: Placeholder[IStartedService] = Placeholder()
+        self._stopped_service: Placeholder[IStartedService] = Placeholder()
 
-    def add_service(self, service: AbstractService) -> None:
+    def add_service(self, service: IService) -> None:
         self._not_started_service.set(service)
 
-    def add_started_service(self, service: AbstractStartedService) -> None:
+    def add_started_service(self, service: IStartedService) -> None:
         self._running_service.set(service)
 
     def is_service_running(self) -> bool:

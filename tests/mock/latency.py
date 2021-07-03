@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Tuple
-from rcpicar.latency.ILatencyListener import ILatencyListener
-from rcpicar.latency.ILatencyServerService import ILatencyServerService
+from rcpicar.latency.interfaces import ILatencyListener, ILatencyServerService
 from tests.suite.spy import FunctionSpy
 
 

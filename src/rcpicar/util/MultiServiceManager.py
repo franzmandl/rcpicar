@@ -2,27 +2,25 @@ from __future__ import annotations
 from logging import getLogger
 from typing import List
 from .FirstInLastOut import FirstInLastOut
-from ..clock import IClock
-from ..service import AbstractService, AbstractStartedService, AbstractServiceManager, StartedServiceWrapper
+from ..service import IService, IStartedService, IServiceManager, StartedServiceWrapper
 
 
-class MultiServiceManager(AbstractServiceManager):
-    def __init__(self, clock: IClock, join_timeout_seconds: float = 0.1) -> None:
-        super().__init__(clock)
+class MultiServiceManager(IServiceManager):
+    def __init__(self, join_timeout_seconds: float = 0.1) -> None:
         self._join_timeout_seconds = join_timeout_seconds
         self._logger = getLogger(__name__)
-        self._not_started_services: FirstInLastOut[AbstractService] = FirstInLastOut()
-        self._running_services: FirstInLastOut[AbstractStartedService] = FirstInLastOut()
-        self._stopped_services: FirstInLastOut[AbstractStartedService] = FirstInLastOut()
+        self._not_started_services: FirstInLastOut[IService] = FirstInLastOut()
+        self._running_services: FirstInLastOut[IStartedService] = FirstInLastOut()
+        self._stopped_services: FirstInLastOut[IStartedService] = FirstInLastOut()
 
-    def add_service(self, service: AbstractService) -> None:
+    def add_service(self, service: IService) -> None:
         self._not_started_services.append(service)
 
-    def add_started_service(self, service: AbstractStartedService) -> None:
+    def add_started_service(self, service: IStartedService) -> None:
         self._running_services.append(service)
 
     def join_all(self) -> None:
-        stubborn_services: List[AbstractStartedService] = []
+        stubborn_services: List[IStartedService] = []
         while True:
             service = self._stopped_services.pop()
             if service is None:

@@ -1,23 +1,22 @@
 from logging import getLogger
 from threading import Event
 from typing import Optional
-from ..service import AbstractStartedService, AbstractServiceManager
-from ..routed.IRoutedReceiveListener import IRoutedReceiveListener
-from ..message import message_types
-from ..routed.RoutedReceiveService import RoutedReceiveService
+from .interfaces import IStopServerService
+from ..receive import IReceiveListener, IReceiveService
+from ..service import IStartedService, IServiceManager
 from ..util.ConnectionDetails import ConnectionDetails
 
 
-class StopServerService(AbstractStartedService, IRoutedReceiveListener):
+class StopServerService(IStartedService, IStopServerService, IReceiveListener):
     def __init__(
             self,
-            routed_receive_service: RoutedReceiveService,
-            service_manager: AbstractServiceManager
+            receive_service: IReceiveService,
+            service_manager: IServiceManager
     ) -> None:
-        super().__init__(service_manager)
         self.event = Event()
         self.logger = getLogger(__name__)
-        routed_receive_service.add_receive_listener(message_types.stop, self)
+        receive_service.add_receive_listener(self)
+        service_manager.add_started_service(self)
 
     def get_service_name(self) -> str:
         return __name__
@@ -25,7 +24,7 @@ class StopServerService(AbstractStartedService, IRoutedReceiveListener):
     def join_service(self, timeout_seconds: Optional[float] = None) -> bool:
         return not self.event.is_set()
 
-    def on_routed_receive(self, message_type: int, message: bytes, details: ConnectionDetails) -> None:
+    def on_receive(self, message: bytes, details: ConnectionDetails) -> None:
         self.event.set()
 
     def wait(self) -> None:

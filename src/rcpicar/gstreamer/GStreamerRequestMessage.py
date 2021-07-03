@@ -6,7 +6,7 @@ from ..message import IMessage
 separator = ','
 
 
-class VideoRequestMessage(IMessage):
+class GStreamerRequestMessage(IMessage):
     def __init__(self, address: Tuple[str, int], settings: VideoSettings) -> None:
         self.address = address
         self.settings = settings
@@ -22,6 +22,6 @@ class VideoRequestMessage(IMessage):
         ]).encode()
 
     @staticmethod
-    def decode(message: bytes) -> VideoRequestMessage:
+    def decode(message: bytes) -> GStreamerRequestMessage:
         ip, port, bit_rate, fps, height, width = message.decode().split(separator)
-        return VideoRequestMessage((ip, int(port)), VideoSettings(int(bit_rate), int(fps), int(height), int(width)))
+        return GStreamerRequestMessage((ip, int(port)), VideoSettings(int(bit_rate), int(fps), int(height), int(width)))

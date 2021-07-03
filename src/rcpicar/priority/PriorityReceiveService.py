@@ -3,23 +3,22 @@ from threading import Thread
 from typing import Optional
 from .PriorityMessage import PriorityMessage
 from ..clock import IClock
-from ..service import AbstractService, AbstractServiceManager
 from ..receive import IReceiveListener, IReceiveService
+from ..service import IService, IServiceManager
 from ..util.Atomic import Atomic
 from ..util.ConnectionDetails import ConnectionDetails
 from ..util.InterruptableSleep import InterruptableSleep
 from ..util.Listeners import Listeners
 
 
-class PriorityReceiveService(AbstractService, IReceiveListener, IReceiveService):
+class PriorityReceiveService(IService, IReceiveListener, IReceiveService):
     def __init__(
             self,
             clock: IClock,
             receive_service: IReceiveService,
-            service_manager: AbstractServiceManager,
-            timeout_seconds: float,
+            service_manager: IServiceManager,
+            timeout_seconds: float
     ) -> None:
-        super().__init__(service_manager)
         self.current_priority = Atomic(0)
         self.interruptable_sleep = InterruptableSleep(clock)
         self.listeners: Listeners[IReceiveListener] = Listeners()
@@ -27,6 +26,7 @@ class PriorityReceiveService(AbstractService, IReceiveListener, IReceiveService)
         self.thread = Thread(target=self.run)
         self.timeout_seconds = timeout_seconds
         receive_service.add_receive_listener(self)
+        service_manager.add_service(self)
 
     def add_receive_listener(self, listener: IReceiveListener) -> PriorityReceiveService:
         self.listeners.add_listener(listener)

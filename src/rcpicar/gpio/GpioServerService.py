@@ -1,9 +1,8 @@
 from __future__ import annotations
 from typing import Callable, Optional
-from .IGpio import IGpio
-from .IGpioServerService import IGpioServerService
-from ..argument import IArguments
-from ..service import AbstractService, AbstractServiceManager
+from .interfaces import IGpio, IGpioService
+from ..service import IService, IServiceManager
+from ..util.argument import IArguments
 from ..util.Placeholder import Placeholder
 from ..util.util import min_max
 from ..util.Lazy import Lazy
@@ -32,21 +31,21 @@ class GpioServerArguments(IArguments):
         self.pwm_steering_range = Lazy(lambda store: self.pwm_range(store))
 
 
-class GpioServerService(IGpioServerService, AbstractService):
+class GpioServerService(IGpioService, IService):
     def __init__(
             self, arguments: GpioServerArguments, gpio_factory: Callable[[], IGpio],
-            service_manager: AbstractServiceManager,
+            service_manager: IServiceManager,
     ) -> None:
-        super().__init__(service_manager)
         self.arguments = arguments
         self.gpio_factory = gpio_factory
         self.gpio: Placeholder[IGpio] = Placeholder()
+        service_manager.add_service(self)
 
     def get_service_name(self) -> str:
         return __name__
 
     def join_service(self, timeout_seconds: Optional[float] = None) -> bool:
-        return False
+        return self.gpio.is_present()
 
     def start_service(self) -> None:
         gpio = self.gpio_factory()
@@ -60,14 +59,11 @@ class GpioServerService(IGpioServerService, AbstractService):
         _set_steering(self.arguments, gpio, 0)
         self.gpio.set(gpio)
 
-    def update(self, motor_value: int, steering_value: int) -> None:
+    def update(self, speed: int, steering: int) -> None:
         with self.gpio as (gpio, _):
             if gpio is not None:
-                _set_motor(self.arguments, gpio, motor_value)
-                _set_steering(self.arguments, gpio, steering_value)
-
-    def reset(self) -> None:
-        self.update(0, 0)
+                _set_motor(self.arguments, gpio, speed)
+                _set_steering(self.arguments, gpio, steering)
 
     def stop_service(self) -> None:
         self.reset()

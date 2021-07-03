@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from threading import Event, Lock, Thread
-from typing import Optional, TypeVar
+from typing import ContextManager, Optional, TypeVar
 from .queue_ import IQueue
+from .service import IServiceManager
 
 T = TypeVar('T')
 
@@ -24,7 +25,7 @@ class IClock(ABC):
         """"""
 
     @abstractmethod
-    def notify(self) -> None:
+    def use_services(self, service_manager: IServiceManager) -> ContextManager[None]:
         """"""
 
     @abstractmethod

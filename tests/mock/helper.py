@@ -1,8 +1,8 @@
 from typing import Generic, Tuple, TypeVar
 from rcpicar.car.CarMessage import CarMessage
 from rcpicar.expire.ExpireMessage import ExpireMessage
-from rcpicar.gstreamer.VideoRequestMessage import VideoRequestMessage
-from rcpicar.gstreamer.VideoResponseMessage import VideoResponseMessage
+from rcpicar.gstreamer.GStreamerRequestMessage import GStreamerRequestMessage
+from rcpicar.gstreamer.GStreamerResponseMessage import GstreamerResponseMessage
 from rcpicar.gstreamer.VideoSettings import VideoSettings
 from rcpicar.latency.LatencyMessage import LatencyMessage
 from rcpicar.message import message_types, IMessage
@@ -22,6 +22,7 @@ mock_client_address = ('client', 1257)
 mock_server_address = ('server', 5682)
 mock_reconnect_seconds = 10.0
 mock_details = ConnectionDetails(mock_client_address, mock_server_address)
+mock_seconds = 1000.0
 mock_video_settings = VideoSettings(8, 4, 9, 7)
 
 MT = TypeVar('MT', bound=IMessage)
@@ -69,15 +70,15 @@ def create_car_message(speed: int, steering: int) -> CarMessageWrapper:
     return CarMessageWrapper(CarMessage(speed, steering), message_types.car)
 
 
+def create_gstreamer_request_message(
+        address: Tuple[str, int], settings: VideoSettings
+) -> TypedMessageWrapper[GStreamerRequestMessage]:
+    return TypedMessageWrapper(GStreamerRequestMessage(address, settings), message_types.gstreamer)
+
+
+def create_gstreamer_response_message(caps: str, port: int) -> TypedMessageWrapper[GstreamerResponseMessage]:
+    return TypedMessageWrapper(GstreamerResponseMessage(caps, port), message_types.gstreamer)
+
+
 def create_latency_message(number: int) -> TypedMessageWrapper[LatencyMessage]:
     return TypedMessageWrapper(LatencyMessage(number), message_types.latency)
-
-
-def create_video_request_message(
-        address: Tuple[str, int], settings: VideoSettings
-) -> TypedMessageWrapper[VideoRequestMessage]:
-    return TypedMessageWrapper(VideoRequestMessage(address, settings), message_types.video)
-
-
-def create_video_response_message(caps: str, port: int) -> TypedMessageWrapper[VideoResponseMessage]:
-    return TypedMessageWrapper(VideoResponseMessage(caps, port), message_types.video)

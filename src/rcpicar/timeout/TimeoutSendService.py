@@ -1,31 +1,34 @@
 from __future__ import annotations
 from threading import Thread
 from typing import Callable, Optional
+from .interfaces import ITimeoutSendService
 from ..clock import IClock
-from ..service import AbstractService, AbstractServiceManager
+from ..service import IService, IServiceManager
 from ..send import ISendService
 from ..util.Atomic import Atomic
-from ..util.AtomicInteger import AtomicInteger
 from ..util.InterruptableSleep import InterruptableSleep
 
 
-class TimeoutSendService(AbstractService):
+class TimeoutSendService(IService, ITimeoutSendService):
     def __init__(
             self,
             clock: IClock,
-            timeout_seconds: float,
             send_service: ISendService,
-            service_manager: AbstractServiceManager,
+            service_manager: IServiceManager,
+            timeout_seconds: float,
             message_callback: Callable[[], Optional[bytes]] = lambda: None,
     ) -> None:
-        super().__init__(service_manager)
         self.interruptable_sleep = InterruptableSleep(clock)
         self.timeout_seconds = timeout_seconds
         self.message_callback = Atomic(message_callback)
-        self.send_count = AtomicInteger(0)
+        self.send_count = 0
         self.send_service = send_service
         self.should_run = True
         self.thread = Thread(target=self.run)
+        service_manager.add_service(self)
+
+    def get_send_count(self) -> int:
+        return self.send_count
 
     def get_service_name(self) -> str:
         return __name__
@@ -52,7 +55,7 @@ class TimeoutSendService(AbstractService):
 
     def _send(self, message: Optional[bytes]) -> None:
         if message is not None:
-            self.send_count.increment()
+            self.send_count += 1
             self.send_service.send(message)
 
     def start_service(self) -> None:

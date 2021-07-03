@@ -23,7 +23,7 @@ class Context:
         self.mock_server_socket = MockSocket.create_udp_server(
             mock_server_address, self.client_to_server_queue, self.server_to_client_queue)
         self.mock_server_socket_factory = MockSocketFactory.create_dummy(self.mock_server_socket)
-        self.service_manager = MultiServiceManager(rtc)
+        self.service_manager = MultiServiceManager()
         self.mock_client_receive_listener = MockReceiveListener.create_dummy()
         self.mock_client_unreliable_receive_listener = MockUnreliableReceiveListener.create_dummy()
         self.mock_client_unreliable_os_error_listener = MockUnreliableOsErrorListener.create_dummy()
@@ -46,7 +46,7 @@ def test() -> None:
     # given
     ctx = Context()
     # when
-    with ctx.service_manager:
+    with rtc.use_services(ctx.service_manager):
         ctx.mock_client_socket.recvfrom_spy.wait_for_call()
         ctx.mock_server_socket.recvfrom_spy.wait_for_call()
         ctx.client_service.send(messages[0])

@@ -5,7 +5,7 @@
 ### Set up
 
 1. Create a venv directory by running `./make.py venv` and do not forget to activate it before the next step.
-2. Install the project and its dependencies by running `pip install --editable .[tests]`.
+2. Install the project and its dependencies by running `pip3 install --editable .[tests]`.
 
 ### Static type checking
 
@@ -22,7 +22,7 @@ Only if the exit code is `0`, then the code style is okay.
 ### Tests
 
 You can run the test suite by running `./make.py test`.
-Only if the exit code is `0`, then all tests were passed.
+Only if the exit code is `0`, then all tests passed.
 This will also print the code and branch coverage and creates a coverage report in `./htmlcov`.
 
 ### Build
@@ -48,8 +48,7 @@ Only if the exit code is `0`, then the upload was successful.
     - `./htmlcov`
     - `./src/*.egg-info`
     - `./venv`
-5. Mark the following directories as **Sources Root**:
-    - `./stubs`
+5. Mark the `./stubs` directory as **Sources Root**
 6. Run Configurations should automatically be imported from the `./.run` directory.
 
 ### Best practices

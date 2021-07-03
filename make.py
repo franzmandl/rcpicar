@@ -92,25 +92,25 @@ def main() -> None:
         'upload-test': {'build'},
     })
     if 'venv' in goals:
-        assert_run(['python', '-m', 'venv', '--system-site-packages', join('.', 'venv')])
+        assert_run(['python3', '-m', 'venv', '--system-site-packages', join('.', 'venv')])
     if 'check_type' in goals:
-        assert_run(['python', '-m', 'mypy'])
+        assert_run(['python3', '-m', 'mypy'])
         assert_file_line('.', '    def __init__\\(self, .*\\):$', prune_excluded)
         assert_file_line('.', '    \\):$', prune_excluded)
     if 'check_style' in goals:
-        assert_run(['python', '-m', 'pycodestyle'])
+        assert_run(['python3', '-m', 'pycodestyle'])
         assert_file_name(join('.', 'stubs'), '^.*\\.pyi$')
         assert_file_line(join('.', 'stubs'), '    pass$')
     if isdir(join('.', 'tests')) and 'test' in goals:
-        assert_run(['python', '-m', 'pytest'])
+        assert_run(['python3', '-m', 'pytest'])
     if 'build' in goals:
         for file_path in get_dist_files():
             unlink(file_path)
-        assert_run(['python', '-m', 'build'])
+        assert_run(['python3', '-m', 'build'])
     if 'upload-test' in goals:
-        assert_run(['python', '-m', 'twine', 'upload', '--repository', 'testpypi'] + list(get_dist_files()))
+        assert_run(['python3', '-m', 'twine', 'upload', '--repository', 'testpypi'] + list(get_dist_files()))
     if 'upload' in goals:
-        assert_run(['python', '-m', 'twine', 'upload'] + list(get_dist_files()))
+        assert_run(['python3', '-m', 'twine', 'upload'] + list(get_dist_files()))
     print('SUCCESS')
 
 
