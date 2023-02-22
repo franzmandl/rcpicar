@@ -1,5 +1,13 @@
 # RCPiCar: Radio-controlled Raspberry Pi Car - Library
 
+## Links
+
+[Here](https://github.com/franzmandl/rcpicar/tree/main/docs) is the full documentation of the library.
+
+[Here](https://github.com/franzmandl/rcpicar/tree/main/videos) are some recorded videos using the library in real life.
+
+[Here](https://github.com/franzmandl/rcpicar_example) is an example project on how this library can be used.
+
 ## Development
 
 ### Set up
@@ -69,7 +77,3 @@ Only if the exit code is `0`, then the upload was successful.
             - First, import python standard packages and third-party libraries ordered alphabetically by package name.
             - Afterwards, import other project files ordered by relative distance (from innermost e.g. `from .Lazy import Lazy` to outermost e.g. `from ..util.Lazy import Lazy`) and alphabetically by package name.
     - Please do not use method decorators except of course `@abstractmethod`, `@property` and `@staticmethod`.
-
-## Links
-
-[Here](https://github.com/franzmandl/rcpicar_example) is an example on how this library can be used.

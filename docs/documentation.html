@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Franz Mandl" />
+  <meta name="dcterms.date" content="2021-06-25" />
+  <title>RCPiCar: Radio-controlled Raspberry Pi Car</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    div.abstract {
+      margin: 2em 2em 2em 2em;
+      text-align: left;
+      font-size: 85%;
+    }
+    div.abstract-title {
+      font-weight: bold;
+      text-align: center;
+      padding: 0;
+      margin-bottom: 0.5em;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title"><p>RCPiCar: Radio-controlled Raspberry Pi Car</p></h1>
+<p class="author"><p>Franz Mandl</p></p>
+<p class="date">2021-06-25</p>
+</header>
+<h2>Abstract</h2>
+<p class="abstract"><p>The Internet of things has already arrived in
+certain aspects of our lives. Controlling a household appliance over a
+network is nothing new. But can we also control a model car? We will
+figure out if we can bypass the radio receiver and transmitter of a
+conventional Radio-Controlled (RC) car and control the car over a
+network connection. Furthermore, we will also mount a camera on the RC
+car and equip the car with a minicomputer like a Raspberry Pi. Hence,
+the project is called <em>RCPiCar</em> = RC car + Raspberry Pi.<br />
+<strong>Keywords:</strong> RC car, Raspberry Pi, IP camera</p></p>
+<nav id="TOC" role="doc-toc">
+<h2 id="toc-title">Contents</h2>
+<ul>
+<li><a href="#introduction" id="toc-introduction"><span
+class="toc-section-number">1</span> Introduction</a></li>
+<li><a href="#hardware" id="toc-hardware"><span
+class="toc-section-number">2</span> Hardware</a>
+<ul>
+<li><a href="#additional-hardware" id="toc-additional-hardware"><span
+class="toc-section-number">2.1</span> Additional Hardware</a></li>
+<li><a href="#mocking-the-radio-receiver"
+id="toc-mocking-the-radio-receiver"><span
+class="toc-section-number">2.2</span> Mocking the Radio
+Receiver</a></li>
+</ul></li>
+<li><a href="#software" id="toc-software"><span
+class="toc-section-number">3</span> Software</a>
+<ul>
+<li><a href="#sec:services" id="toc-sec:services"><span
+class="toc-section-number">3.1</span> Services</a></li>
+<li><a href="#packaging" id="toc-packaging"><span
+class="toc-section-number">3.2</span> Packaging</a></li>
+</ul></li>
+<li><a href="#communication-protocol"
+id="toc-communication-protocol"><span
+class="toc-section-number">4</span> Communication Protocol</a>
+<ul>
+<li><a href="#car-message" id="toc-car-message"><span
+class="toc-section-number">4.1</span> Car Message</a></li>
+</ul></li>
+<li><a href="#video-stream" id="toc-video-stream"><span
+class="toc-section-number">5</span> Video Stream</a>
+<ul>
+<li><a href="#sec:server-pipeline" id="toc-sec:server-pipeline"><span
+class="toc-section-number">5.1</span> Server Pipeline</a></li>
+<li><a href="#client-pipeline" id="toc-client-pipeline"><span
+class="toc-section-number">5.2</span> Client Pipeline</a></li>
+</ul></li>
+<li><a href="#sec:examples" id="toc-sec:examples"><span
+class="toc-section-number">6</span> Examples</a>
+<ul>
+<li><a href="#simple-client-example"
+id="toc-simple-client-example"><span
+class="toc-section-number">6.1</span> Simple Client Example</a></li>
+<li><a href="#simple-server-example"
+id="toc-simple-server-example"><span
+class="toc-section-number">6.2</span> Simple Server Example</a></li>
+<li><a href="#sec:advanced-example" id="toc-sec:advanced-example"><span
+class="toc-section-number">6.3</span> Advanced Client-Server Example</a>
+<ul>
+<li><a href="#create-a-new-service" id="toc-create-a-new-service"><span
+class="toc-section-number">6.3.1</span> Create a New Service</a></li>
+<li><a href="#sec:override-an-existing-service"
+id="toc-sec:override-an-existing-service"><span
+class="toc-section-number">6.3.2</span> Override an Existing
+Service</a></li>
+<li><a href="#bypass-the-throttle" id="toc-bypass-the-throttle"><span
+class="toc-section-number">6.3.3</span> Bypass the Throttle</a></li>
+<li><a href="#command-line-arguments"
+id="toc-command-line-arguments"><span
+class="toc-section-number">6.3.4</span> Command Line Arguments</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#testing" id="toc-testing"><span
+class="toc-section-number">7</span> Testing</a>
+<ul>
+<li><a href="#automated-testing" id="toc-automated-testing"><span
+class="toc-section-number">7.1</span> Automated Testing</a></li>
+<li><a href="#manual-testing" id="toc-manual-testing"><span
+class="toc-section-number">7.2</span> Manual Testing</a></li>
+</ul></li>
+<li><a href="#conclusion" id="toc-conclusion"><span
+class="toc-section-number">8</span> Conclusion</a>
+<ul>
+<li><a href="#limitations" id="toc-limitations"><span
+class="toc-section-number">8.1</span> Limitations</a></li>
+<li><a href="#future-work" id="toc-future-work"><span
+class="toc-section-number">8.2</span> Future Work</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 data-number="1" id="introduction"><span
+class="header-section-number">1</span> Introduction</h1>
+<p>The goal of this project is to modify a conventional RC car, so it
+can be controlled remotely over a network. Therefore, we will replace
+the radio receiver of an existing RC car with a network-compatible
+device. The RC car we are going to modify is already in the possession
+of the author.</p>
+<h1 data-number="2" id="hardware"><span
+class="header-section-number">2</span> Hardware</h1>
+<p>The unmodified RC car is shown in Figure 1 and consists of the
+following components:</p>
+<ul>
+<li>Chassis with motor: <em>Tamiya TT-01</em></li>
+<li>Steering servo: <em>Graupner C 577</em></li>
+<li>Speed controller: <em>Tamiya TEU-101BK</em></li>
+<li>Rechargeable battery: <em>ANSMANN 2000mAh 7.2V</em></li>
+</ul>
+<figure id="fig:hardware-existing">
+<img src="assets/hardware-existing.jpg" alt="The unmodified RC car." />
+<figcaption>Figure 1: The unmodified RC car.</figcaption>
+</figure>
+<p>In Figure 2 we can see an illustration of the electronic modules of
+the unmodified car.</p>
+<figure id="fig:diagram-old">
+<embed src="assets/diagram-old.pdf" />
+<figcaption>Figure 2: Symbolic illustration of the electronic modules of
+a conventional RC car.</figcaption>
+</figure>
+<h2 data-number="2.1" id="additional-hardware"><span
+class="header-section-number">2.1</span> Additional Hardware</h2>
+<p>To control the car over a network connection we need to replace the
+radio receiver with a network-compatible computer. This computer must be
+small enough to fit in the chassis of the car. Therefore, we use a
+<em>Raspberry Pi 2 Model B</em> with a <em>MicroSDHC-Card 32GB - SanDisk
+Extreme Pro</em> running <em>Raspberry Pi OS</em><a href="#fn1"
+class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>,
+which is a Linux-based operating system. To see where the car is
+driving, we mount a camera module for Raspberry Pis on the top of the
+car. To connect the Raspberry Pi to a local network, we use a Wi-Fi to
+USP adapter <em>Cisco-Linksys WUSB600N v2</em>. In Figure 3 we can see
+an illustration of our modifications.</p>
+<figure id="fig:diagram-new">
+<embed src="assets/diagram-new.pdf" />
+<figcaption>Figure 3: Symbolic illustration of the electronic modules
+after our modifications.</figcaption>
+</figure>
+<p>To save weight, we do not want a second battery supplying the
+Raspberry Pi with power. The car is already equipped with a battery for
+the motor, but it has a voltage of 7.2V, while the Raspberry Pi requires
+a voltage of 5V. Therefore, we use a Step-down-Converter <em>TSR
+3-1250</em>, which can be configured to output 5V. Because we are using
+the same battery as the motor, the voltage drops significantly during
+acceleration after a car standstill. Therefore, we use four
+parallel-connected capacitors with a capacity of 12mF to overcome those
+voltage drops. We also want to measure the battery voltage with an
+Analog-Digital-Converter (ADC). Figure 4 shows the wiring diagram of a
+board featuring all components.</p>
+<figure id="fig:electrical-wiring">
+<embed src="assets/electrical-wiring.pdf" />
+<figcaption>Figure 4: Wiring diagram of the adapter board.</figcaption>
+</figure>
+<p>In Figure 5 we can see the board inside the car connecting the
+components. The battery voltage is measured by an ADC
+<em>ADS1115</em>.</p>
+<figure id="fig:hardware-modified">
+<img src="assets/hardware-modified.jpg"
+alt="The interior of the modified RC car." />
+<figcaption>Figure 5: The interior of the modified RC car.</figcaption>
+</figure>
+<h2 data-number="2.2" id="mocking-the-radio-receiver"><span
+class="header-section-number">2.2</span> Mocking the Radio Receiver</h2>
+<p>Two Pulse Width Modulation (PWM) signals are used for the
+communication between the radio receiver and the speed controller. One
+PWM signal is used to control the steering angle and the other PWM
+signal is used to control the speed of the car. The controller only
+considers PWM signals with 50Hz and a duty cycle between 5% and 10% as
+valid signals. In case of an invalid signal, the car stops, a red LED is
+blinking on the controller and a beep-sound is played. In Figure 6 we
+can see how a valid PWM signal looks like.</p>
+<figure id="fig:diagram-pwm">
+<embed src="assets/diagram-pwm.pdf" />
+<figcaption>Figure 6: A valid PWM signal to control the motor or the
+steering servo.</figcaption>
+</figure>
+<p>By varying the duty cycle, we can adjust the speed and the steering
+angle. To generate the PWM signals, we will use the General-Purpose
+Inputs/Outputs (GPIO) of the Raspberry Pi.</p>
+<h1 data-number="3" id="software"><span
+class="header-section-number">3</span> Software</h1>
+<p>We will use a client-server architecture to build our software. The
+Raspberry Pi inside the car will act as server while a computer
+connecting to the car will act as client. The client has to send the
+desired speed and steering angle periodically to the server. If the
+server does not receive such message from the client before a certain
+timeout, the car will immediately stop. We are going to transfer the
+video stream of the camera using a separate connection.</p>
+<p>To allow reusability of the software in other projects, the software
+is split into a library called <code>rcpicar</code>, which can be found
+on GitHub<a href="#fn2" class="footnote-ref" id="fnref2"
+role="doc-noteref"><sup>2</sup></a>, and an example application using
+this library, which will be described later in Section 6.</p>
+<p>The library favors composition over inheritance by defining
+interfaces, which get implemented by base classes. Those base classes do
+not get inherited anymore.</p>
+<p>Python 3.7 is already installed on Raspberry Pi OS, but this Python
+version does not support interfaces (protocols<a href="#fn3"
+class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>)
+yet. So, in Python 3.7, interfaces are basically abstract classes
+without any members or constructor. In our library, all interfaces are
+prefixed with the letter <code>I</code>.</p>
+<h2 data-number="3.1" id="sec:services"><span
+class="header-section-number">3.1</span> Services</h2>
+<p>The software is organized in services. Each service has exactly one
+concern. A service is an entity which can have three states: <em>not
+started</em>, <em>running</em> and <em>stopped</em>. After starting a
+service, the state changes from <em>not started</em> to
+<em>running</em>. During startup, a service can allocate resources
+and/or start threads. Stopping the service should release any allocated
+resources and stop any started threads. The service is now in the state
+<em>stopped</em>.</p>
+<p>Most services are indented to start and stop only once per
+application run. Whether a service needs all three states depends on the
+purpose and implementation of the service. The library contains services
+which neither need to be started nor stopped. Those services do not have
+any state and do not need to implement any interface. Some services do
+not need to be started, but they need to be stopped. Those services
+implement the interface <code>IStartedService</code> and add themselves
+to a service manager. Services needing all three states implement the
+interface <code>IService</code> and add themselves to a service
+manager.</p>
+<p>For starting and stopping multiple services at once, we can use a
+service manager. A service manager implements the interface
+<code>IServiceManager</code>. A service manager can also wait till all
+services are in the state <em>stopped</em>.</p>
+<h2 data-number="3.2" id="packaging"><span
+class="header-section-number">3.2</span> Packaging</h2>
+<p>In Python, a package can be a file with the file ending
+<code>.py</code> or a directory containing a file called
+<code>__init__.py</code>. The root package <code>rcpicar</code> contains
+various sub packages. In our library, file sub packages often just
+declare interfaces. Those sub packages are listed and described
+bellow:</p>
+<ul>
+<li><code>rcpicar.clock</code> defines an interface called
+<code>IClock</code>, which defines various time-dependent methods.</li>
+<li><code>rcpicar.constants</code> defines some static immutable
+values.</li>
+<li><code>rcpicar.message</code> defines a singleton called
+<code>message_types</code> and an interface called
+<code>IMessage</code>. A message is indented to be sent over a network.
+Therefore, a message can be encoded as bytes and those bytes can also be
+decoded to a message object again.</li>
+<li><code>rcpicar.process</code> defines an interface called
+<code>IProcess</code> describing a child process spawned by the
+application.</li>
+<li><code>rcpicar.queue_</code> defines an interface called
+<code>IQueue</code> which should be implemented by thread-safe
+queues.</li>
+<li><code>rcpicar.receive</code> defines two interfaces
+<code>IReceiveListener</code> and <code>IReceiveService</code>. A
+receive listener waits for a message and a receive service manages such
+listeners.</li>
+<li><code>rcpicar.reliable</code> defines various interfaces describing
+a reliable connection, e.g. using the Transmission Control Protocol
+(TCP).</li>
+<li><code>rcpicar.send</code> defines an interface called
+<code>ISendService</code> to send a message.</li>
+<li><code>rcpicar.service</code> defines three interfaces
+<code>IService</code>, <code>IStartedService</code> and
+<code>IServiceManager</code> as already described in Section 3.1.</li>
+<li><code>rcpicar.socket_</code> defines an interface called
+<code>ISocket</code> describing the socket Application Programming
+Interface (API) of an operating system.</li>
+<li><code>rcpicar.unreliable</code> defines various interfaces
+describing an unreliable connection, e.g. using the User Datagram
+Protocol (UDP).</li>
+</ul>
+<p>The root package <code>rcpicar</code> also contains directories.
+Those directory sub packages implement the interfaces defined in the
+file sub packages. Most directory sub packages contain two classes which
+names end with <code>ClientService</code> or <code>ServerService</code>.
+Those classes contain service code which is supposed to run on the
+client- or server-side respectively. There might also be classes which
+names end with <code>ServiceArguments</code>. Those classes allow to
+alter certain parameters of a service. It is also possible to allow the
+user to specify certain parameters as command line argument. Some
+directory sub packages also define classes which names end with
+<code>Message</code>. Those classes implement the interface
+<code>IMessage</code> and should also define a static method
+<code>decode(message: bytes)</code> to create a certain message object
+from bytes. All directory sub packages are listed and described
+bellow:</p>
+<ul>
+<li><code>rcpicar.car</code> contains logic for controlling the car. It
+allows to set the speed and steering angle of the car by calling a
+method <code>update(speed: int, steering: int)</code>. The speed must be
+given as integer between -100 and 100, where -100 means 100% backward
+speed, 0 means stop, and 100 means 100% forward speed. The steering
+angle must also be given as integer between -100 and 100, where -100
+means 100% steer left, 0 means straightforward, and 100 means 100% steer
+right.</li>
+<li><code>rcpicar.client</code> contains a recommendation on how to plug
+all services together on the client-side while allowing to override each
+service.</li>
+<li><code>rcpicar.discovery</code> can be used to discover the IP
+address of the car server in a network. This is done by sending some
+magic bytes as broadcast.</li>
+<li><code>rcpicar.expire</code> filters out-of-order messages by adding
+a message number to each message. While sending messages over a network,
+the message might arrive in a different order on the receive side. TCP
+already takes care of message ordering, but UDP does not.</li>
+<li><code>rcpicar.gpio</code> controls the PWM output signals of the
+Raspberry Pi’s GPIOs.</li>
+<li><code>rcpicar.gstreamer</code> handles a H.264 video stream by
+spawning and terminating a <code>gst-launch-1.0</code><a href="#fn4"
+class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> and
+<code>raspivid</code><a href="#fn5" class="footnote-ref" id="fnref5"
+role="doc-noteref"><sup>5</sup></a> process. Note that only one instance
+of <code>raspivid</code> can be running at a time.</li>
+<li><code>rcpicar.latency</code> measures the connection quality by
+periodically sending a message and measuring the response time.</li>
+<li><code>rcpicar.log</code> uses Python’s <code>logging</code> package
+for log output and logging to a log file.</li>
+<li><code>rcpicar.priority</code> enables the possibility of supporting
+multiple clients.</li>
+<li><code>rcpicar.promise</code> allows to synchronously wait for a
+value in one thread while it is computed in another thread. It is
+inspired by Futures<a href="#fn6" class="footnote-ref" id="fnref6"
+role="doc-noteref"><sup>6</sup></a> in Java and Promises<a href="#fn7"
+class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> in
+JavaScript.</li>
+<li><code>rcpicar.routed</code> provides a message router which enables
+sending different message types using the same connection by prepending
+a single byte to each message.</li>
+<li><code>rcpicar.server</code> contains a recommendation on how to plug
+all services together on the server-side while allowing to override each
+service.</li>
+<li><code>rcpicar.stop</code> can be used to stop the server from the
+client side.</li>
+<li><code>rcpicar.tcp</code> implements a reliable connection using
+TCP.</li>
+<li><code>rcpicar.throttle</code> uses the <code>rcpicar.latency</code>
+package to measure the network quality and applies a speed
+throttle.</li>
+<li><code>rcpicar.timeout</code> can be used for sending and receiving
+periodical messages.</li>
+<li><code>rcpicar.udp</code> implements an unreliable connection using
+UDP.</li>
+<li><code>rcpicar.util</code> contains various utility classes and
+functions. Some of them are listed and described bellow:
+<ul>
+<li><code>rcpicar.util.argument</code> uses Python’s
+<code>argparse</code> module to provide a convenient way to offer
+service parameters as command line arguments.</li>
+<li><code>rcpicar.util.Atomic</code> and
+<code>rcpicar.util.AtomicInteger</code> have a built-in lock to lock
+their value.</li>
+<li><code>rcpicar.util.IdealQueue</code> is a queue designed for
+multiple threads putting items on the queue while one thread consumes
+those items in a loop. In contrast to Python 3.7’s <code>queue</code>
+package, the items here can have a generic data type.</li>
+<li><code>rcpicar.util.InterruptableSleep</code> allows a thread to
+sleep, but can also get interrupted by another thread.</li>
+<li><code>rcpicar.util.Lazy</code> allows lazy evaluation of a value.
+Once a value got calculated by calling a method <code>get()</code>, the
+value gets stored and is never calculated again. By using
+<code>rcpicar.util.Lazy</code> we allow the concrete application to
+override service parameters or even whole services. In Section 6.3.2 it
+will be described how to override services.</li>
+<li><code>rcpicar.util.Placeholder</code> stores exactly one value or
+<code>None</code> if the value was not set yet or if it was cleared.
+Threads can wait for the value to come available using promises provided
+by <code>rcpicar.promise</code>.</li>
+<li><code>rcpicar.util.Process</code> implements the interface
+<code>IProcess</code> using Python’s <code>subprocess.Popen</code><a
+href="#fn8" class="footnote-ref" id="fnref8"
+role="doc-noteref"><sup>8</sup></a> class.</li>
+<li><code>rcpicar.util.MultiServiceManager</code> implements the
+interface <code>IServiceManager</code> and can start and stop multiple
+service.</li>
+<li><code>rcpicar.util.RTC</code> implements the interface
+<code>IClock</code> using the real time.</li>
+<li><code>rcpicar.util.Socket</code> implements the interface
+<code>ISocket</code> using Python’s <code>socket</code><a href="#fn9"
+class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>
+package.</li>
+</ul></li>
+</ul>
+<h1 data-number="4" id="communication-protocol"><span
+class="header-section-number">4</span> Communication Protocol</h1>
+<p>For the communication between client and server the library provides
+a connection-oriented but reliable TCP connection and a connection-less
+but unreliable UDP connection. For sending different types of messages
+using the same connection we can use the services provided by the
+<code>rcpicar.routed</code> package. To send a message we can use an
+instance of <code>RoutedSendService</code>. The sender has to specify a
+message type, which is an integer number between 0 and 255. The receiver
+has to register as listener to an instance of
+<code>RoutedReceiveService</code> specifying the same message type. The
+library already defines five message types in the package
+<code>rcpicar.message</code>:</p>
+<ul>
+<li><code>car</code> is used by the package <code>rcpicar.car</code> to
+update the car’s speed and steering angle.</li>
+<li><code>custom</code> is unused by the library and can be used by the
+library user to send application specific messages.</li>
+<li><code>gstreamer</code> is used by the package
+<code>rcpicar.gstreamer</code> to negotiate the video stream
+parameters.</li>
+<li><code>latency</code> is used by the package
+<code>rcpicar.latency</code> to measure the latency between server and
+client.</li>
+<li><code>stop</code> is used by the package <code>rcpicar.stop</code>
+to shut down the server application.</li>
+</ul>
+<p>A possible handshake between client and server might look like as
+illustrated in Figure 7. The client does not know the IP address and
+port of the server yet. Therefore, it sends a broadcast message and the
+server responds with its IP address and port. Then the client requests a
+video stream of the camera by sending a message of type
+<code>gstreamer</code>. The server provides the requested video stream
+and responds with a message of type <code>gstreamer</code>. A message of
+type <code>latency</code> can be sent any time by the server and the
+client has to send it back to the server as fast as possible. Then the
+client can start sending messages of type <code>car</code> to control
+the car as shown in Figure 8.</p>
+<figure id="fig:protocol-handshake">
+<embed src="assets/protocol-handshake.pdf" />
+<figcaption>Figure 7: Handshake between client and server.</figcaption>
+</figure>
+<figure id="fig:protocol-continous">
+<embed src="assets/protocol-continous.pdf" />
+<figcaption>Figure 8: Continuous communication between client and
+server.</figcaption>
+</figure>
+<h2 data-number="4.1" id="car-message"><span
+class="header-section-number">4.1</span> Car Message</h2>
+<p>A message to control the car consists of 6 bytes. Each service
+consumes specific bytes of the message. On the client side we can use
+the <code>CarClientService</code> to compose and send the message by
+calling the method <code>update(speed: int, steering: int)</code>. In
+the example shown in Figure 9, the client commands the car to drive with
+10% speed forward and steer 20% to the right. As a result, the
+<code>CarClientService</code> tells the <code>TimeoutSendService</code>
+to send this command periodically. The <code>ExpireSendService</code>
+adds an incrementing message number to every car message starting with
+1. The <code>PrioritySendService</code> adds a byte to indicate that
+this message has normal priority. In the case that multiple clients
+would send messages, the message with the highest priority is taken.
+Before the message is sent using the <code>UdpService</code>, the
+<code>RoutedSendService</code> adds a byte to indicate that this is a
+message of type <code>car</code>. After receiving the message on the
+server side, the message gets decomposed by the corresponding services.
+The <code>RoutedReceiveService</code> consumes the first byte of the
+message and recognizes that it has received a message of type
+<code>car</code>. Then it forwards the rest of the message to the
+<code>PriorityReceiveService</code> which consumes the next byte.
+<code>ExpireReceiveService</code> consumes the next two bytes and checks
+whether the message arrived in the correct order.
+<code>TimeoutReceiveService</code> checks whether the message arrived in
+time, triggering a timeout otherwise. The
+<code>ThrottleServerService</code> might reduce the speed, depending on
+the current network latency. Finally, the <code>CarServerService</code>
+tells the <code>GpioServerService</code> to update the PWM signals of
+the GPIOs.</p>
+<figure id="fig:protocol-car_message">
+<embed src="assets/protocol-car_message.pdf" />
+<figcaption>Figure 9: Composition and decomposition of a 6-byte-long car
+message in detail.</figcaption>
+</figure>
+<h1 data-number="5" id="video-stream"><span
+class="header-section-number">5</span> Video Stream</h1>
+<p>For streaming the video recorded by the camera mounted on top of the
+car, we use <em>GStreamer</em><a href="#fn10" class="footnote-ref"
+id="fnref10" role="doc-noteref"><sup>10</sup></a>. GStreamer is an open
+source multimedia framework internally using the <em>GObject</em>
+library. GStreamer runs on many platforms including Microsoft Windows
+and Linux-based systems. Although GStreamer is written in C, bindings
+exist for other programming languages like Python. GStreamer also comes
+with a very powerful command line tool called
+<code>gst-launch-1.0</code><a href="#fn11" class="footnote-ref"
+id="fnref11" role="doc-noteref"><sup>11</sup></a>.</p>
+<p>GStreamer is based on the pipeline architecture. A pipeline consists
+of elements which can be connected with each other. Each element has at
+least one <em>source pad</em>, one <em>sink pad</em> or both. A sink pad
+represents the input of an element while a source pad represents the
+output. By connecting the source pad of one element to the sink pad of
+another element, we can construct our pipeline.</p>
+<h2 data-number="5.1" id="sec:server-pipeline"><span
+class="header-section-number">5.1</span> Server Pipeline</h2>
+<p>The server pipeline should send the video provided by a
+<code>raspivid</code><a href="#fn12" class="footnote-ref" id="fnref12"
+role="doc-noteref"><sup>12</sup></a> process to a client. The following
+command writes a H.264-encoded video from the camera to the standard
+output:</p>
+<pre class="shell"><code>raspivid -n -t 0 -h 720 -w 1280 -fps 30 -b 2000000 -o -</code></pre>
+<p>We can specify the height, width, frame rate and bit rate using the
+command line arguments <code>-h</code>, <code>-w</code>,
+<code>-fps</code> and <code>-b</code> respectivly. We take the standard
+output and pipe it in our GStreamer process <code>gst-launch-1.0</code>.
+The following command expects a H.264-encoded video from the standard
+input and sends it to a client:</p>
+<pre class="shell"><code>gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay \
+  ! udpsink host=$client_ip port=$port</code></pre>
+<p>Note that the variables <code>$client_ip</code> and
+<code>$port</code> need to be replaced.</p>
+<p><code>fdsrc</code><a href="#fn13" class="footnote-ref" id="fnref13"
+role="doc-noteref"><sup>13</sup></a> is the first element in our
+pipeline and it tells GStreamer to read the video from standard input.
+Using an exclamation mark <code>!</code> we can connect the source pad
+to the sink pad of the next element. The next element is
+<code>h264parse</code><a href="#fn14" class="footnote-ref" id="fnref14"
+role="doc-noteref"><sup>14</sup></a>, which parses the H.264 video.
+<code>rtph264pay</code><a href="#fn15" class="footnote-ref" id="fnref15"
+role="doc-noteref"><sup>15</sup></a> payload-encodes the H264-encoded
+video into Real-time Transport Protocol (RTP) packets. Finally,
+<code>udpsink</code><a href="#fn16" class="footnote-ref" id="fnref16"
+role="doc-noteref"><sup>16</sup></a> sends UDP packets to the
+client.</p>
+<p>The server pipeline is located in
+<code>rcpicar.gstreamer.GStreamerServerService</code>. We use Python’s
+<code>subprocess</code> package to spawn those two processes and pipe
+the standard input to the standard output. We also parse the standard
+output of the <code>gst-launch-1.0</code> process and remember the
+capabilities, which will be important in the following section.</p>
+<h2 data-number="5.2" id="client-pipeline"><span
+class="header-section-number">5.2</span> Client Pipeline</h2>
+<p>The client pipeline receives the video stream. The following command
+listens a video stream and renders it on the client computer:</p>
+<pre class="shell"><code>gst-launch-1.0 -v udpsrc port=$port caps=&#39;$caps&#39; ! rtph264depay \
+  ! avdec_h264 ! videoconvert ! autovideosink sync=false</code></pre>
+<p>Note that the variables <code>$port</code> and <code>$caps</code>
+need to be replaced. The value of <code>$caps</code> (capabilities)
+needs to be taken from the standard output of the
+<code>gst-launch-1.0</code> process on the server side as described in
+the previous Section 5.1.</p>
+<p>The pipeline consists of the elements <code>udpsrc</code><a
+href="#fn17" class="footnote-ref" id="fnref17"
+role="doc-noteref"><sup>17</sup></a>, <code>rtph264depay</code><a
+href="#fn18" class="footnote-ref" id="fnref18"
+role="doc-noteref"><sup>18</sup></a>, <code>avdec_h264</code><a
+href="#fn19" class="footnote-ref" id="fnref19"
+role="doc-noteref"><sup>19</sup></a>, <code>videoconvert</code><a
+href="#fn20" class="footnote-ref" id="fnref20"
+role="doc-noteref"><sup>20</sup></a> and <code>autovideosink</code><a
+href="#fn21" class="footnote-ref" id="fnref21"
+role="doc-noteref"><sup>21</sup></a>. The element <code>udpsrc</code>
+listens to UDP packets while <code>autovideosink</code> renders the
+video stream.</p>
+<p>The client pipeline is not located in the <code>rcpicar</code>
+library because its composition depends on the actual use case. The
+command above is just an example on how it might look like.</p>
+<h1 data-number="6" id="sec:examples"><span
+class="header-section-number">6</span> Examples</h1>
+<p>We will have a look at a very simple client-server example using the
+<code>rcpicar</code> library. In eight steps we will create and execute
+a client application and a server application. Both, client and server,
+need to be connected to the same network. The client will read the
+desired speed and steering from the standard input and send it to the
+server. Speed and steering are both integers between -100 and 100. This
+example does not show the video stream of the camera yet because it does
+not have a graphical user interface.</p>
+<h2 data-number="6.1" id="simple-client-example"><span
+class="header-section-number">6.1</span> Simple Client Example</h2>
+<ol type="1">
+<li>Install the library by running
+<code>pip install rcpicar[client]</code>.</li>
+<li>Create a file with the following example content:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rcpicar.client.Client <span class="im">import</span> Client</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> Client()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Configure log</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>client.log_arguments.configure_log()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable services</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>client.car_service.get()</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>client.latency_service.get()</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Start and run services</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> client.use_services():</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        client.car_service.get().update(</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            <span class="bu">int</span>(<span class="bu">input</span>(<span class="st">&#39;speed: &#39;</span>)), <span class="bu">int</span>(<span class="bu">input</span>(<span class="st">&#39;steering: &#39;</span>)))</span></code></pre></div>
+<ol start="3" type="1">
+<li>Execute the file with Python.</li>
+<li>Stop the application by sending a keyboard interrupt.</li>
+</ol>
+<h2 data-number="6.2" id="simple-server-example"><span
+class="header-section-number">6.2</span> Simple Server Example</h2>
+<ol type="1">
+<li>Install the library by running
+<code>pip install rcpicar[server]</code>.</li>
+<li>Create a file with the following example content:</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rcpicar.server.Server <span class="im">import</span> Server</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>server <span class="op">=</span> Server()</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Configure log</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>server.log_arguments.configure_log()</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Enable services</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>server.car_service.get()</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>server.discovery_service.get()</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Start and run services</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> server.use_services():</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>(<span class="st">&#39;Press ENTER to stop the server.&#39;</span>)</span></code></pre></div>
+<ol start="3" type="1">
+<li>Execute the file with Python.</li>
+<li>Stop the application by pressing the enter key.</li>
+</ol>
+<h2 data-number="6.3" id="sec:advanced-example"><span
+class="header-section-number">6.3</span> Advanced Client-Server
+Example</h2>
+<p>A more advanced example can be found on GitHub<a href="#fn22"
+class="footnote-ref" id="fnref22" role="doc-noteref"><sup>22</sup></a>.
+This example uses the GTK library<a href="#fn23" class="footnote-ref"
+id="fnref23" role="doc-noteref"><sup>23</sup></a> on the client side to
+render the video stream and binds the arrow keys on the keyboard to
+steer the car. The client pipeline is located in
+<code>rcpicar_example.gtk.GtkVideoService</code> and it uses a library
+providing GObject bindings for Python called <code>PyGObject</code><a
+href="#fn24" class="footnote-ref" id="fnref24"
+role="doc-noteref"><sup>24</sup></a>. The example also shows how to use
+already existing services from the <code>rcpicar</code> library as well
+as how to create a new service.</p>
+<h3 data-number="6.3.1" id="create-a-new-service"><span
+class="header-section-number">6.3.1</span> Create a New Service</h3>
+<p>In the example we create a server service called
+<code>VoltageServerService</code> to measure the battery voltage using
+an ADC connected via the I²C bus. The service implements the interface
+<code>IService</code> and adds itself to a service manager because it
+needs to be started and stopped to require and release the I²C bus as a
+resource. We also create a client service called
+<code>VoltageClientService</code> to log the measured voltage. Since the
+service does not need to be started nor stopped it does not implement
+<code>IService</code> nor <code>IStartedService</code>. We also create a
+new message called <code>VoltageMessage</code>, which encodes and
+decodes the voltage as floating-point number. For sending the current
+voltage from the server to the client we want to use UDP. Therefore, we
+create a custom unreliable routed message service using the message type
+<code>custom</code> and create a new message type called
+<code>voltage</code>.</p>
+<h3 data-number="6.3.2" id="sec:override-an-existing-service"><span
+class="header-section-number">6.3.2</span> Override an Existing
+Service</h3>
+<p>The example also shows how to override an existing service. The
+steering servo of car used for demonstration was not able to drive
+straightforward without a slight correction of the PWM signal.
+Therefore, we create a new GPIO server service called
+<code>TamiyaTt01</code> by implementing the interface
+<code>IGpioServerService</code>. The following line can be found in the
+server’s main file and it wraps our custom GPIO service around the
+default GPIO service:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>server.gpio_service.<span class="bu">set</span>(TamiyaTt01(server.gpio_service.get()))</span></code></pre></div>
+<h3 data-number="6.3.3" id="bypass-the-throttle"><span
+class="header-section-number">6.3.3</span> Bypass the Throttle</h3>
+<p>The throttle service measures the latency between client and server
+and enforces a maximum speed according to the measured latency, as well
+as setting the maximum timeout between car messages. By default, the
+throttle service is enabled by the car service, but we can disable the
+throttle service by adding the following lines of code in our server’s
+main file:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Bypass the throttle.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>server.throttle_service.<span class="bu">set</span>(server.gpio_service.get())</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a constant timeout.</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>server.timeout_service.get().set_timeout(<span class="fl">0.25</span>)</span></code></pre></div>
+<h3 data-number="6.3.4" id="command-line-arguments"><span
+class="header-section-number">6.3.4</span> Command Line Arguments</h3>
+<p>Certain service parameters can easily be registered as command line
+parameters to the user. Many services already define useful parameters
+to be registered as command line arguments, but we might also ignore
+them or create our own command line parameters. The server’s main file
+of the advanced example does both. It creates own command line arguments
+in the server’s main file, while also registering recommended
+arguments:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>process_arguments([</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Register recommended command line arguments.</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    server.discovery_arguments,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create and register own command line argument.</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    create_value_argument(</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        server.gpio_arguments.pwm_motor_maximum,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;--pwm-motor-maximum&#39;</span>, <span class="bu">int</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;Throttle max forward speed.&#39;</span>),</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div>
+<h1 data-number="7" id="testing"><span
+class="header-section-number">7</span> Testing</h1>
+<p>The <code>rcpicar</code> library was created with huge concerns about
+type safety and testability. Therefore, the library defines many
+interfaces implemented by services, while also allowing to override or
+mock those interfaces.</p>
+<h2 data-number="7.1" id="automated-testing"><span
+class="header-section-number">7.1</span> Automated Testing</h2>
+<p>Testing a multi-threaded application is not trivial compared to test
+a single-threaded application. Somehow, we have to synchronize the test
+with the state of the application. Therefore, a test case can either use
+the real time clock and wait for events to happen in the application or
+mock the time by controlling the clock by the test case.</p>
+<p>All test cases can be found in the package <code>tests.case</code>,
+which contains three sub packages for system, integration and unit
+tests. Test cases using the real time are suffixed with
+<code>_rtc</code> while tests without this suffix are either time
+independent or they mock the time. Mocking the time is not difficult
+because, as already mentioned, the library defines an interface
+<code>IClock</code>, which contains all time-dependent method calls. A
+test case implements this interface and is now able to control the time.
+The package <code>tests.mock</code> already contains many useful
+implementations of interfaces defined by the library, which can be used
+to write test cases. The mock implementation of <code>IClock</code>
+located in <code>tests.mock.clock</code> has a method
+<code>tick()</code>, which increments the time of the application and
+notifies all time-dependent threads that the clock was updated using a
+condition variable.</p>
+<p>All mocks in the package <code>tests.mock</code> are type-safe and
+allow to make assertions on the call history of some methods as well as
+waiting in a test case until a specific method has been called. We can
+also specify the implementation of certain methods by providing either a
+callback, a constant to return, an exception to throw, an iterable of
+return values, an iterator of return values or a dictionary containing a
+mapping of method arguments to return values.</p>
+<h2 data-number="7.2" id="manual-testing"><span
+class="header-section-number">7.2</span> Manual Testing</h2>
+<p>The application described in Section 6.3 was also manually tested on
+a real race circuit as shown in Figures 10, 11. The connection between
+the client computer and the car was established using a Wi-Fi access
+point provided by the Raspberry Pi. The maximal distance between the
+client computer and the car was 18m for this test. The
+<code>TimeoutReceiveService</code> was configured to stop the car if the
+server has not received a car message for 250ms. No such timeout
+happened during this test and <code>ExpireReceiveService</code> did not
+detect any out-of-order messages. A resolution of 1280x720 pixels was
+used to stream the video.</p>
+<p>Increasing the distance between client computer and car without any
+obstacles decreases the signal strength. Timeouts got noticeable at
+about 80m since the car stopped at each timeout. The signal was
+completely lost at about 90m and the car stopped.</p>
+<figure id="fig:race_circuit-user">
+<img src="assets/race_circuit-user.png"
+alt="Race circuit from the user’s perspective." />
+<figcaption>Figure 10: Race circuit from the user’s
+perspective.</figcaption>
+</figure>
+<figure id="fig:race_circuit-car">
+<img src="assets/race_circuit-car.png"
+alt="Race circuit from the car’s perspective using the camera mounted on the top of the car." />
+<figcaption>Figure 11: Race circuit from the car’s perspective using the
+camera mounted on the top of the car.</figcaption>
+</figure>
+<h1 data-number="8" id="conclusion"><span
+class="header-section-number">8</span> Conclusion</h1>
+<p>As a result, two software projects were created:</p>
+<ul>
+<li>A Python library for developing a client-server software to control
+a RC car over a network. The source code can be found on GitHub<a
+href="#fn25" class="footnote-ref" id="fnref25"
+role="doc-noteref"><sup>25</sup></a> and the corresponding Python
+package can be found on PyPI<a href="#fn26" class="footnote-ref"
+id="fnref26" role="doc-noteref"><sup>26</sup></a>.</li>
+<li>An application using the library, which can also be found on
+GitHub<a href="#fn27" class="footnote-ref" id="fnref27"
+role="doc-noteref"><sup>27</sup></a>.</li>
+</ul>
+<h2 data-number="8.1" id="limitations"><span
+class="header-section-number">8.1</span> Limitations</h2>
+<p>GStreamer, which was used for video streaming, is available on most
+modern operating system, but the installation is much easier on
+Linux-based system than on Microsoft Windows.</p>
+<p>Currently, the car is only able to fully handle one client at a time.
+This is because <code>TcpServerService</code> and
+<code>UdpService</code> cannot handle multiple client connections in
+parallel and, most important, <code>GStreamerServerService</code> can
+only send the video stream to one client at a time.</p>
+<h2 data-number="8.2" id="future-work"><span
+class="header-section-number">8.2</span> Future Work</h2>
+<p>To circumvent the installation process on the client side, we might
+replace the Python client with a website directly hosted by the
+Raspberry Pi inside the car. This was tried using WebSockets and WebRTC,
+but it was not possible to create a real time video stream. The WebRTC
+library <em>aiortc</em><a href="#fn28" class="footnote-ref" id="fnref28"
+role="doc-noteref"><sup>28</sup></a> was used for the experiment, but
+there might be other more promising libraries available.</p>
+<p>To fully support multiple clients, we might use a <em>tee</em><a
+href="#fn29" class="footnote-ref" id="fnref29"
+role="doc-noteref"><sup>29</sup></a> element to duplicate the video
+stream in <code>GStreamerServerService</code> or we can use GStreamer’s
+RTSP server<a href="#fn30" class="footnote-ref" id="fnref30"
+role="doc-noteref"><sup>30</sup></a>. In addition,
+<code>TcpServerService</code> and <code>UdpService</code> need to be
+extended to support multiple client connections.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a
+href="https://www.raspberrypi.org/software/">https://www.raspberrypi.org/software/</a><a
+href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><a
+href="https://github.com/franzmandl/rcpicar">https://github.com/franzmandl/rcpicar</a><a
+href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p><a
+href="https://www.python.org/dev/peps/pep-0544/">https://www.python.org/dev/peps/pep-0544/</a><a
+href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p><a
+href="https://gstreamer.freedesktop.org/documentation/tools/gst-launch.html">https://gstreamer.freedesktop.org/documentation/tools/gst-launch.html</a><a
+href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p><a
+href="https://www.raspberrypi.org/documentation/usage/camera/raspicam/raspivid.md">https://www.raspberrypi.org/documentation/usage/camera/raspicam/raspivid.md</a><a
+href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p><a
+href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Future.html">https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Future.html</a><a
+href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p><a
+href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise</a><a
+href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p><a
+href="https://docs.python.org/3/library/subprocess.html#popen-constructor">https://docs.python.org/3/library/subprocess.html#popen-constructor</a><a
+href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p><a
+href="https://docs.python.org/3/library/socket.html">https://docs.python.org/3/library/socket.html</a><a
+href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p><a
+href="https://gstreamer.freedesktop.org/">https://gstreamer.freedesktop.org/</a><a
+href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p><a
+href="https://gstreamer.freedesktop.org/documentation/tools/gst-launch.html">https://gstreamer.freedesktop.org/documentation/tools/gst-launch.html</a><a
+href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p><a
+href="https://www.raspberrypi.org/documentation/usage/camera/raspicam/raspivid.md">https://www.raspberrypi.org/documentation/usage/camera/raspicam/raspivid.md</a><a
+href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn13"><p><a
+href="https://gstreamer.freedesktop.org/documentation/coreelements/fdsrc.html">https://gstreamer.freedesktop.org/documentation/coreelements/fdsrc.html</a><a
+href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn14"><p><a
+href="https://gstreamer.freedesktop.org/documentation/videoparsersbad/h264parse.html">https://gstreamer.freedesktop.org/documentation/videoparsersbad/h264parse.html</a><a
+href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn15"><p><a
+href="https://gstreamer.freedesktop.org/documentation/rtp/rtph264pay.html">https://gstreamer.freedesktop.org/documentation/rtp/rtph264pay.html</a><a
+href="#fnref15" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn16"><p><a
+href="https://gstreamer.freedesktop.org/documentation/udp/udpsink.html">https://gstreamer.freedesktop.org/documentation/udp/udpsink.html</a><a
+href="#fnref16" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn17"><p><a
+href="https://gstreamer.freedesktop.org/documentation/udp/udpsrc.html">https://gstreamer.freedesktop.org/documentation/udp/udpsrc.html</a><a
+href="#fnref17" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn18"><p><a
+href="https://gstreamer.freedesktop.org/documentation/rtp/rtph264depay.html">https://gstreamer.freedesktop.org/documentation/rtp/rtph264depay.html</a><a
+href="#fnref18" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn19"><p><a
+href="https://gstreamer.freedesktop.org/documentation/libav/avdec_h264.html">https://gstreamer.freedesktop.org/documentation/libav/avdec_h264.html</a><a
+href="#fnref19" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn20"><p><a
+href="https://gstreamer.freedesktop.org/documentation/videoconvert/index.html">https://gstreamer.freedesktop.org/documentation/videoconvert/index.html</a><a
+href="#fnref20" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn21"><p><a
+href="https://gstreamer.freedesktop.org/documentation/autodetect/autovideosink.html">https://gstreamer.freedesktop.org/documentation/autodetect/autovideosink.html</a><a
+href="#fnref21" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn22"><p><a
+href="https://github.com/franzmandl/rcpicar_example">https://github.com/franzmandl/rcpicar_example</a><a
+href="#fnref22" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn23"><p><a href="https://gtk.org/">https://gtk.org/</a><a
+href="#fnref23" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn24"><p><a
+href="https://pygobject.readthedocs.io/en/latest/">https://pygobject.readthedocs.io/en/latest/</a><a
+href="#fnref24" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn25"><p><a
+href="https://github.com/franzmandl/rcpicar">https://github.com/franzmandl/rcpicar</a><a
+href="#fnref25" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn26"><p><a
+href="https://pypi.org/project/rcpicar/">https://pypi.org/project/rcpicar/</a><a
+href="#fnref26" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn27"><p><a
+href="https://github.com/franzmandl/rcpicar_example">https://github.com/franzmandl/rcpicar_example</a><a
+href="#fnref27" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn28"><p><a
+href="https://github.com/aiortc/aiortc">https://github.com/aiortc/aiortc</a><a
+href="#fnref28" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn29"><p><a
+href="https://gstreamer.freedesktop.org/documentation/coreelements/tee.html">https://gstreamer.freedesktop.org/documentation/coreelements/tee.html</a><a
+href="#fnref29" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn30"><p><a
+href="https://gstreamer.freedesktop.org/documentation/gst-rtsp-server/rtsp-server.html">https://gstreamer.freedesktop.org/documentation/gst-rtsp-server/rtsp-server.html</a><a
+href="#fnref30" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+</body>
+</html>
